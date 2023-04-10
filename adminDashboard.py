@@ -98,6 +98,11 @@ class AdminDashboard():
         image = image.resize((70, 70))
         self.img = ImageTk.PhotoImage(image=image)
 
+        # Image for search
+        searchImage = (Image.open("./assets/search.png"))
+        searchImage = logoutImage.resize((30, 30))
+        self.searchImg = ImageTk.PhotoImage(image=searchImage)
+
         # profile image
         ProfileImage = (Image.open("./assets/user.png"))
         ProfileImage = ProfileImage.resize((100, 100))
@@ -149,11 +154,132 @@ class AdminDashboard():
     # Load searchBook 
     def loadSearchPage(self):
         self.clearFrame()
-        searchFrame = ttk.Frame(self.centerFrame, height=self.height-70, width=self.width-100, border=2, style='center.TFrame')
-        self.style.configure('center.TFrame', background=self.centerFrameColor)
-        searchFrame.pack(side=LEFT)
-        searchLabel = ttk.Label(searchFrame, text="Search")
-        searchLabel.pack()
+
+        def searchBook():
+            value = bookName.get()
+            code = zipCode.get()
+            print(value)
+            print(code)
+            print(type(zipCode.get()))
+            nameQuery = "books.name LIKE '%"+value+"%'"
+            query = "SELECT books.* FROM books INNER JOIN Admin ON Admin.name = books.book_store WHERE "
+            if value != "Name" and code == "ZipCode":
+                 query += nameQuery
+            elif value != "Name" and code != "ZipCode":
+                query += nameQuery + " and Admin.zipCode={0}".format(int(code))
+            elif value == "Name" and code != "ZipCode":
+                query += "Admin.zipCode={0}".format(int(code))
+            print(query)
+            self.db.cursor.execute(query)
+            # and Admin.zipCode="+zipcode.get()+"")
+            searchedData = self.db.cursor.fetchall()
+            print('Search Data:',searchedData)
+            if len(searchedData) != 0:
+                list_books.delete(0, END)
+                count = 0
+                for data in searchedData:
+                    list_books.insert(count, str(count+1)+"."+data[0])
+                    count += 1
+                list_books.bind("<<ListboxSelect>>", bookInfo)
+        # search bar
+        searchBar = LabelFrame(self.centerFrame, width=300, height=200, text='Search box', bg='#9bc9ff')
+        searchBar.grid(row=0, column=0)
+
+        def focus_out(field):
+            # print('focus out:', userName.get())
+            if field == "name":
+                if bookName.get() == "":
+                    bookName.insert(0, "Name")
+            elif field == "zipcode":
+                if zipCode.get() == "":
+                    zipCode.insert(0, "ZipCode")
+        
+        def focus_in(field):
+            # print('focus in: ', userName.get())
+            if field == "name":
+                if bookName.get() == "Name":
+                    bookName.delete(0, END)
+            elif field == "zipcode":
+                if zipCode.get() == "ZipCode":
+                    zipCode.delete(0, END)
+
+        
+            
+        bookName = Entry(searchBar, background='#ECF2FF', font='Helvitica 10 bold', foreground='#665A48', width=30, border=1, highlightthickness=0)
+        bookName.insert(0, "Name")
+        bookName.bind("<FocusOut>", lambda event: focus_out("name"))
+        bookName.bind("<FocusIn>", lambda event: focus_in("name"))
+        bookName.grid(padx=20, pady=20)
+        # canvas.create_line(width=25)
+
+        zipCode = Entry(searchBar, background='#ECF2FF', font='Helvitica 10 bold', foreground='#665A48', width=30, border=1, highlightthickness=0)
+        zipCode.insert(0, "ZipCode")
+        zipCode.bind("<FocusOut>", lambda event: focus_out("zipcode"))
+        zipCode.bind("<FocusIn>", lambda event: focus_in("zipcode"))
+        zipCode.grid(padx=20, pady=20)
+
+        search = Button(searchBar, image=self.searchImg, command=searchBook, compound=RIGHT, text='Search', background='#ECF2FF',font='Helvitica 10 bold', border=1)
+        search.grid(ipadx=5, ipady=5, pady=10)
+
+        
+        def bookInfo(event):
+            book_data = ''
+            if event != '':
+                value = str(list_books.get(list_books.curselection()))
+                name = value.split(".")[1]
+                print(name)
+                self.db.cursor.execute("select * from books where name='"+name+"'")
+                book_data = self.db.cursor.fetchall()
+                print(book_data)
+            else:
+                book_data = ['--------------------------']
+            
+            for widget in bookDetailsFrame.winfo_children():
+                widget.destroy()
+            
+            # listDetails.delete(0, END)
+            detailsLabel = ttk.Label(bookDetailsFrame, image=self.Bimg)
+            detailsLabel.pack()
+
+            Label(bookDetailsFrame,text="Book Name:", bg='#D8D9CF').pack()
+            Label(bookDetailsFrame, text=str(book_data[0][0]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+            Label(bookDetailsFrame, text="Price", bg='#D8D9CF').pack()
+            Label(bookDetailsFrame, text=str(book_data[0][1]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+            Label(bookDetailsFrame, text="Author", bg='#D8D9CF').pack()
+            Label(bookDetailsFrame, text=str(book_data[0][2]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+            Label(bookDetailsFrame, text="Published Year", bg='#D8D9CF').pack()
+            Label(bookDetailsFrame, text=str(book_data[0][3]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+            Label(bookDetailsFrame, text="Store Name:", bg='#D8D9CF').pack()
+            Label(bookDetailsFrame, text=str(book_data[0][4]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+            Label(bookDetailsFrame, text="Quantity", bg='#D8D9CF').pack()
+            Label(bookDetailsFrame, text=str(book_data[0][5]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+            Label(bookDetailsFrame, text="Publisher Name:", bg='#D8D9CF').pack()
+            Label(bookDetailsFrame, text=str(book_data[0][6]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            if book_data[0][5] != 0:
+                Button(bookDetailsFrame, text='Register Book').pack(pady=20)
+            else:
+                Button(bookDetailsFrame, text='Notify Me').pack()
+        
+        list_books = Listbox(self.centerFrame, width=40, height=30, bd=0, border=0, highlightthickness=0)
+        scroll_bar = Scrollbar(self.centerFrame, orient=VERTICAL, bd=0, border=0, highlightthickness=0)
+        list_books.grid(row=0, column=1, padx=(10,0), pady=10, sticky=N)
+        scroll_bar.config(command=list_books.yview)
+        list_books.config(yscrollcommand=scroll_bar.set)
+        scroll_bar.grid(row=0, column=2, sticky=N+S+E)
+
+        # list details
+        # listDetails = Listbox(self.centerFrame, width=80, height=30, bd=2)
+        # listDetails.grid(row=0, column=1, padx=(10,0), pady=10, sticky=N)
+        bookDetailsFrame = Frame(self.centerFrame, background='#D8D9CF')
+        bookDetailsFrame.grid(row=0, column=3, sticky=N, padx=20, ipadx=50, ipady=20)
+
+        bookInfo('')
 
     def loadUpdateBookPage(self):
         self.clearFrame()
