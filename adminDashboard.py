@@ -83,6 +83,11 @@ class AdminDashboard():
         rImage = rImage.resize((30, 30))
         self.reportImg = ImageTk.PhotoImage(image=rImage)
 
+        # Image for logout
+        logoutImage = (Image.open("./assets/logout.png"))
+        logoutImage = logoutImage.resize((30, 30))
+        self.logoutImg = ImageTk.PhotoImage(image=logoutImage)
+
         # Image for book update
         updateImage = (Image.open("./assets/update.png"))
         updateImage = updateImage.resize((30, 30))
@@ -159,7 +164,34 @@ class AdminDashboard():
 
         addBookButton = Button(frame1, command=partial(self.AddBook,['','','','','','','','','']),border=0, image=self.addImg,compound=TOP, text='Add a Book', bg='#EDE4E0', font='Helvitica 15 bold')
         addBookButton.pack()
-
+    # Logout
+    def logout(self):
+        self.clearFrame()
+        self.root.destroy()
+    def displayUniqueBooks(self, data):
+        window=Tk()
+        self.db.cursor.execute("SELECT * FROM books where book_store ='"+self.adminDetails[0][0]+"'")
+        books = self.db.cursor.fetchall()
+        e=Label(window,width=20,text='Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=0)
+        e=Label(window,width=20,text='Price',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=1)
+        e=Label(window,width=20,text='Author',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=2)
+        e=Label(window,width=20,text='Published Year',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=3)
+        e=Label(window,width=20,text='Book Store',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=4)
+        e=Label(window,width=20,text='Quantity',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=5)
+        e=Label(window,width=20,text='Publisher Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=6)
+        i=1
+        for student in books: 
+            for j in range(len(student)):
+                e = Label(window, text=student[j]) 
+                e.grid(row=i, column=j) 
+            i=i+1
 
     def loadReportsPage(self):
         self.clearFrame()
@@ -183,7 +215,7 @@ class AdminDashboard():
                 if book[5] <= 5:
                     lessQuantBook += book[0] + " | "
             return lessQuantBook
-
+            
         # Reports
         frame1 = Frame(self.centerFrame, background='#EDE4E0', width= 200, height=200)
         frame1.grid(row=0, column=0, rowspan=20, padx=30, ipadx=50)
@@ -192,9 +224,12 @@ class AdminDashboard():
         frame3 = Frame(self.centerFrame, background='#EDE4E0')
         frame3.grid(row=0, column=2, rowspan=20, padx=30, ipadx=50)
 
-        Label(frame1, image=self.stackImg,compound=TOP, text='Unique book count:', bg='#EDE4E0').pack()
+        uniqueBook = Label(frame1, image=self.stackImg,compound=TOP, text='Unique book count:', bg='#EDE4E0')
+        uniqueBook.pack()
+        uniqueBook.bind("<Button-1>", self.displayUniqueBooks)
         totalBooks = Label(frame1, text=str(self.bookCount), background='#EDE4E0', font='Helvitica 15 bold')
         totalBooks.pack()
+        frame1.bind("<Button-1>", self.displayUniqueBooks)
         Label(frame2, image=self.allImg,compound=TOP, text='Total books:', bg='#EDE4E0').pack()
         totalQunatity = Label(frame2,text=str(getQunatity()), background='#EDE4E0', font='Helvitica 15 bold')
         totalQunatity.pack()
@@ -319,6 +354,10 @@ class AdminDashboard():
         search = ttk.Button(self.leftFrame, text="Reports", image=self.reportImg, style="navButton.TButton", compound=LEFT, command=self.loadReportsPage)
         search.pack()
 
+        # Exit
+        logout = ttk.Button(self.leftFrame, text="Logout ", image=self.logoutImg, style="navButton.TButton", compound=LEFT, command=self.logout)
+        logout.pack()
+
         self.root.mainloop()
 
     def AdminBooks(self, calledFrom):
@@ -334,37 +373,40 @@ class AdminDashboard():
                 print(book_data)
             else:
                 book_data = ['--------------------------']
+            try:
+                for widget in bookDetailsFrame.winfo_children():
+                    widget.destroy()
+                
+                # listDetails.delete(0, END)
+                detailsLabel = ttk.Label(bookDetailsFrame, image=self.Bimg)
+                detailsLabel.pack()
+                data = [book_data[0][0], book_data[0][5], book_data[0][6], book_data[0][3], book_data[0][1], book_data[0][2]]
+                Label(bookDetailsFrame,text="Book Name:", bg='#D8D9CF').pack()
+                Label(bookDetailsFrame, text=str(book_data[0][0]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+                Label(bookDetailsFrame, text="Price", bg='#D8D9CF').pack()
+                Label(bookDetailsFrame, text=str(book_data[0][1]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+                Label(bookDetailsFrame, text="Author", bg='#D8D9CF').pack()
+                Label(bookDetailsFrame, text=str(book_data[0][2]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+                Label(bookDetailsFrame, text="Published Year", bg='#D8D9CF').pack()
+                Label(bookDetailsFrame, text=str(book_data[0][3]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+                Label(bookDetailsFrame, text="Store Name:", bg='#D8D9CF').pack()
+                Label(bookDetailsFrame, text=str(book_data[0][4]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+                Label(bookDetailsFrame, text="Quantity", bg='#D8D9CF').pack()
+                Label(bookDetailsFrame, text=str(book_data[0][5]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+
+                Label(bookDetailsFrame, text="Publisher Name:", bg='#D8D9CF').pack()
+                Label(bookDetailsFrame, text=str(book_data[0][6]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+                if calledFrom == "update":
+                    Button(bookDetailsFrame, text='Update Book', command=partial(self.AddBook, data)).pack(pady=20)
+
+            except:
+                pass
             
-            for widget in bookDetailsFrame.winfo_children():
-                widget.destroy()
-            
-            # listDetails.delete(0, END)
-            detailsLabel = ttk.Label(bookDetailsFrame, image=self.Bimg)
-            detailsLabel.pack()
-            data = [book_data[0][0], book_data[0][5], book_data[0][6], book_data[0][3], book_data[0][1], book_data[0][2]]
-            Label(bookDetailsFrame,text="Book Name:", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][0]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
-
-            Label(bookDetailsFrame, text="Price", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][1]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
-
-            Label(bookDetailsFrame, text="Author", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][2]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
-
-            Label(bookDetailsFrame, text="Published Year", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][3]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
-
-            Label(bookDetailsFrame, text="Store Name:", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][4]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
-
-            Label(bookDetailsFrame, text="Quantity", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][5]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
-
-            Label(bookDetailsFrame, text="Publisher Name:", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][6]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
-            if calledFrom == "update":
-                Button(bookDetailsFrame, text='Update Book', command=partial(self.AddBook, data)).pack(pady=20)
-
         def displayBooks():
             self.db.cursor.execute("SELECT * FROM books where book_store ='"+self.adminDetails[0][0]+"'")
             books = self.db.cursor.fetchall()
@@ -374,7 +416,8 @@ class AdminDashboard():
                 list_books.destroy()
                 scroll_bar.destroy()
                 bookDetailsFrame.destroy()
-                Label(self.centerFrame, image=self.Noimg,compound=TOP, text="No books are there in your store!!", background='#D8D9CF', font='Helvitica 20 bold').grid(row=0, column=0, rowspan=1, columnspan=1, ipadx=300)
+                Label(self.centerFrame, image=self.Noimg,compound=TOP, text="No books are there in your store!!", background='#D8D9CF', font='Helvitica 20 bold').grid(row=0, column=0, rowspan=1, columnspan=1, ipadx=100)
+                return
             list_books.delete(0, END)
             for book in books:
                 list_books.insert(count, str(count+1)+"."+book[0])

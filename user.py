@@ -1,10 +1,12 @@
 from functools import partial
+import re
 from tkinter import Tk, messagebox, ttk
 from tkinter import *
 from PIL import Image, ImageTk
 from adminDashboard import AdminDashboard
 
 from db import Database
+from userDashboard import UserDashboard
 
 class User():
 
@@ -43,7 +45,7 @@ class User():
                 messagebox.askokcancel('Error!', message='Either username or password is wrong!!')
             else:
                 self.root.destroy()
-                home = AdminDashboard(userDetails)
+                home = UserDashboard(userDetails)
                 home.dashboard()
 
     def loadLoginScreen(self):
@@ -144,6 +146,18 @@ class User():
         # window = Toplevel(self.root)
         # Screen resolution
         # self.root.destroy()
+
+        def validate_password(password):  
+            if len(password) < 8:  
+                return False  
+            if not re.search("[a-z]", password):  
+                return False  
+            if not re.search("[A-Z]", password):  
+                return False  
+            if not re.search("[0-9]", password):  
+                return False  
+            return True
+
         self.clearFrame()
         window = self.root
         # self.width = self.root.winfo_screenwidth()
@@ -259,6 +273,8 @@ class User():
         def signUp():
             if name.get() == '' or userName.get() == '' or password.get() == '' or contact.get() == '':
                 messagebox.askokcancel(title= 'Error!', message='Required fields missing?')
+            elif not validate_password(password.get()):
+                messagebox.askokcancel(title= 'Error!', message='Password should contain A-Z, a-z, 0-9 and lenght 8')
             else:
                 self.db.addNewUser(name.get(), userName.get(), password.get(), contact.get())
                 messagebox.showinfo(title='Success', message='Registered successfully!!')

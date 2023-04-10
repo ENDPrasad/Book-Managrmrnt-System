@@ -1,4 +1,5 @@
 from functools import partial
+import re
 from tkinter import Tk, messagebox, ttk
 from tkinter import *
 from PIL import Image, ImageTk
@@ -270,9 +271,22 @@ class Admin():
         password.bind("<FocusIn>", lambda event: focus_in("password"))
         password.pack(padx=100, pady=20)
 
+        def validate_password(password):  
+            if len(password) < 8:  
+                return False  
+            if not re.search("[a-z]", password):  
+                return False  
+            if not re.search("[A-Z]", password):  
+                return False  
+            if not re.search("[0-9]", password):  
+                return False  
+            return True
+
         def signUp():
             if name.get() == '' or userName.get() == '' or password.get() == '' or contact.get() == '':
                 messagebox.askokcancel(title= 'Error!', message='Required fields missing?')
+            elif not validate_password(password.get()):
+                messagebox.askokcancel(title= 'Error!', message='Password should contain A-Z, a-z, 0-9 and lenght 8')
             else:
                 self.db.addNewAdmin(name.get(), userName.get(), password.get(), contact.get(), zipCode.get())
                 messagebox.showinfo(title='Success', message='Registered successfully!!')

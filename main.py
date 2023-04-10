@@ -65,12 +65,16 @@ class App():
     def gotoAdminLogin(self):
         self.root.destroy()
         self.adminPage = Admin()
+        # App()
         self.adminPage.loadLoginScreen()
+        App()
 
     def gotoLoginPage(self):
         self.root.destroy()
         self.userPage = User()
         self.userPage.loadLoginScreen()
+        App()
+
 
 
 if __name__ == "__main__":

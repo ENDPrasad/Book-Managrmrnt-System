@@ -4,6 +4,7 @@ from tkinter import *
 from PIL import Image, ImageTk
 
 from db import Database
+# from main import App
 
 class UserDashboard():
     def __init__(self, userDetails) -> None:
@@ -75,6 +76,11 @@ class UserDashboard():
         sImage = sImage.resize((30, 30))
         self.sImg = ImageTk.PhotoImage(image=sImage)
 
+        # Image for logout
+        logoutImage = (Image.open("./assets/logout.png"))
+        logoutImage = logoutImage.resize((30, 30))
+        self.logoutImg = ImageTk.PhotoImage(image=logoutImage)
+
         # top frame image
         image = (Image.open("./assets/library.png"))
         image = image.resize((70, 70))
@@ -115,6 +121,11 @@ class UserDashboard():
         searchFrame.pack(side=LEFT)
         searchLabel = ttk.Label(searchFrame, text="Search")
         searchLabel.pack()
+
+    def logout(self):
+        self.clearFrame()
+        self.root.destroy()
+
     
 
     def dashboard(self):
@@ -153,6 +164,10 @@ class UserDashboard():
         # Search Book
         search = ttk.Button(self.leftFrame, text="Search     ", image=self.sImg, style="navButton.TButton", compound=LEFT, command=self.loadSearchPage)
         search.pack()
+
+        # Exit
+        logout = ttk.Button(self.leftFrame, text="Logout ", image=self.logoutImg, style="navButton.TButton", compound=LEFT, command=self.logout)
+        logout.pack()
 
         self.root.mainloop()
 
