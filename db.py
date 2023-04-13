@@ -24,6 +24,18 @@ class Database:
         except mysql.connector.Error as e:
             print("Failed to create a Admin: "+e.msg)
 
+    def registerBook(self, user_name, bookName, store_name, price, time):
+        try:
+            
+            query="INSERT INTO transaction ( book_name, store_name, user_name, book_cost, transaction_time) VALUES('"+ bookName +"', '"+store_name+"', '"+ user_name+"', {0}, '{1}')".format(price, time)
+            print(query)
+            self.cursor.execute(query)
+            self.connection.commit()
+            # cursor.execute("INSERT INTO Admin ( name, email, password, contact) VALUES(  '"+ name +"', '"+email+", "+ password+"', "+ contact+" )")
+            print('Admin added successfully')
+        except mysql.connector.Error as e:
+            print("Failed to create a Admin: "+e.msg)
+
     def addNewUser(self, name, email, password, contact):
         try:
             

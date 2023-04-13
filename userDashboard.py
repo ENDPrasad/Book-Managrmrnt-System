@@ -1,5 +1,8 @@
 
-from tkinter import Tk, ttk
+import datetime
+from functools import partial
+import time
+from tkinter import Tk, messagebox, ttk
 from tkinter import *
 from PIL import Image, ImageTk
 
@@ -72,7 +75,7 @@ class UserDashboard():
         self.dImg = ImageTk.PhotoImage(image=dImage)
 
         # Image for search book
-        sImage = (Image.open("./assets/research.png"))
+        sImage = (Image.open("./assets/search3.png"))
         sImage = sImage.resize((30, 30))
         self.sImg = ImageTk.PhotoImage(image=sImage)
 
@@ -82,9 +85,14 @@ class UserDashboard():
         self.logoutImg = ImageTk.PhotoImage(image=logoutImage)
 
         # Image for search
-        searchImage = (Image.open("./assets/search.png"))
-        searchImage = logoutImage.resize((30, 30))
+        searchImage = (Image.open("./assets/search2.png"))
+        searchImage = searchImage.resize((30, 30))
         self.searchImg = ImageTk.PhotoImage(image=searchImage)
+
+        # Image for search
+        orderImage = (Image.open("./assets/order.png"))
+        orderImage = orderImage.resize((30, 30))
+        self.orderImg = ImageTk.PhotoImage(image=orderImage)
 
         # top frame image
         image = (Image.open("./assets/library.png"))
@@ -93,13 +101,27 @@ class UserDashboard():
 
         # profile image
         ProfileImage = (Image.open("./assets/user.png"))
-        ProfileImage = ProfileImage.resize((60, 60))
+        ProfileImage = ProfileImage.resize((100, 100))
         self.Pimg = ImageTk.PhotoImage(image=ProfileImage)
+
+        # profile small image
+        ProfileSImage = ProfileImage.resize((30, 30))
+        self.PSimg = ImageTk.PhotoImage(image=ProfileSImage)
 
         # Book image
         bookImage = (Image.open("./assets/book.png"))
         bookImage = bookImage.resize((100, 100))
         self.Bimg = ImageTk.PhotoImage(image=bookImage)
+
+        # count image
+        countImage = (Image.open("./assets/countdown.png"))
+        countImage = countImage.resize((100, 100))
+        self.countImg = ImageTk.PhotoImage(image=countImage)
+
+        # checkList image
+        checkImage = (Image.open("./assets/checklist.png"))
+        checkImage = checkImage.resize((100, 100))
+        self.checkImg = ImageTk.PhotoImage(image=checkImage)
 
         # No Book image
         noBookImage = (Image.open("./assets/no_books.png"))
@@ -108,6 +130,64 @@ class UserDashboard():
 
 
     # Functions required for nav buttons
+
+    def viewProfile(self):
+        print("profile", self.userDetails)
+        def updateAdmin():
+            pass
+
+        window=Tk()
+        mainFrame = Frame(window, bg='#EDE4E0')
+        mainFrame.pack(fill=BOTH)
+        labelFrame = LabelFrame(mainFrame, text='Profile Details', bg='#EDE4E0',  highlightbackground='white', font='lucida 12 bold', relief='solid', padx=20)
+        labelFrame.pack(expand=True, fill=X)
+        nameLabel = Label(labelFrame, text='Name',  bg='#EDE4E0', font='lucida 10 bold')
+        nameLabel.pack(pady=2)
+        bookName = ttk.Entry(labelFrame, width=30)
+        bookName.insert(0, self.userDetails[0][0])
+        bookName.pack(pady=2)
+        quantityLabel = Label(labelFrame, text='Email',  bg='#EDE4E0', font='lucida 10 bold')
+        quantityLabel.pack(pady=2)
+        quantity = ttk.Entry(labelFrame, width=30)
+        quantity.insert(0, self.userDetails[0][1])
+
+        quantity.pack(pady=2)
+        
+        pbNameLabel = Label(labelFrame, text='Contact',  bg='#EDE4E0', font='lucida 10 bold')
+        pbNameLabel.pack(pady=2)
+        pbName = ttk.Entry(labelFrame, width=30)
+        pbName.insert(0, self.userDetails[0][2])
+
+        pbName.pack(pady=2)
+        pbYearLabel = Label(labelFrame, text='Password',  bg='#EDE4E0', font='lucida 10 bold')
+        pbYearLabel.pack(pady=2)
+        pbYear = ttk.Entry(labelFrame, width=30)
+        pbYear.insert(0, self.userDetails[0][3])
+
+        pbYear.pack(pady=2)
+
+        addBook = Button(labelFrame, text="Update Profile", command= updateAdmin)
+        addBook.pack(pady=20)
+
+    def viewOrdersPage(self, data, subData):
+        window=Tk()
+        print(data)
+        e=Label(window,width=20,text='Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=0)
+        e=Label(window,width=20,text='Store Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=1)
+        e=Label(window,width=20,text='Customer Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=2)
+        e=Label(window,width=20,text='Book Cost',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=3)
+        e=Label(window,width=20,text='Transcation time',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=4)
+        i=1
+        for transaction in data: 
+            for j in range(len(transaction)):
+                e = Label(window, text=transaction[j]) 
+                e.grid(row=i, column=j) 
+            i=i+1
 
     def clearFrame(self):
         for widget in self.centerFrame.winfo_children():
@@ -118,9 +198,38 @@ class UserDashboard():
         self.clearFrame()
         self.AllBooks()
 
+    # Load Orders
+    def loadOrders(self):
+        self.clearFrame()
+        query = "SELECT * FROM transaction WHERE user_name='"+self.userDetails[0][0] + "'"
+        self.db.cursor.execute(query)
+        data = self.db.cursor.fetchall()
+        # if len(data):
+            # Label(self.centerFrame, text=str(data[0])).pack()
+        
+        # Reports
+        frame1 = Frame(self.centerFrame, background='#EDE4E0', width= 200, height=200)
+        frame1.grid(row=0, column=0, rowspan=20, padx=30, ipadx=50)
+        frame2 = Frame(self.centerFrame, background='#EDE4E0')
+        frame2.grid(row=0, column=1, rowspan=20, padx=30, ipadx=50)
+        frame3 = Frame(self.centerFrame, background='#EDE4E0')
+        frame3.grid(row=0, column=2, rowspan=20, padx=30, ipadx=50)
+
+        totalOrders = Label(frame1, image=self.countImg,compound=TOP, text='Total Orders', bg='#EDE4E0')
+        totalOrders.pack()
+        # totalOrders.bind("<Button-1>", self.displayUniqueBooks)
+        totalOrdersLabel = Label(frame1, text=str(len(data)), background='#EDE4E0', font='Helvitica 15 bold')
+        totalOrdersLabel.pack()
+
+        viewOrdersLabel = Label(frame2,image=self.checkImg,compound=TOP, text="\nView Orders", background='#EDE4E0', font='Helvitica 15 bold')
+        viewOrdersLabel.pack()
+        viewOrdersLabel.bind("<Button-1>", partial(self.viewOrdersPage,data))
+        
+
     # Load searchBook 
     def loadSearchPage(self):
         self.clearFrame()
+        self.style.configure('center.TFrame', background="#9bc9ff")
 
         def searchBook():
             value = bookName.get()
@@ -141,6 +250,8 @@ class UserDashboard():
             # and Admin.zipCode="+zipcode.get()+"")
             searchedData = self.db.cursor.fetchall()
             print('Search Data:',searchedData)
+            list_books.delete(0, END)
+            bookInfo('')
             if len(searchedData) != 0:
                 list_books.delete(0, END)
                 count = 0
@@ -150,7 +261,7 @@ class UserDashboard():
                 list_books.bind("<<ListboxSelect>>", bookInfo)
         # search bar
         searchBar = LabelFrame(self.centerFrame, width=300, height=200, text='Search box', bg='#9bc9ff')
-        searchBar.grid(row=0, column=0)
+        searchBar.grid(row=0, column=0, sticky=N)
 
         def focus_out(field):
             # print('focus out:', userName.get())
@@ -160,6 +271,9 @@ class UserDashboard():
             elif field == "zipcode":
                 if zipCode.get() == "":
                     zipCode.insert(0, "ZipCode")
+            elif field == "storeName":
+                if storeName.get() == "":
+                    storeName.insert(0, "Store Name")
         
         def focus_in(field):
             # print('focus in: ', userName.get())
@@ -169,6 +283,9 @@ class UserDashboard():
             elif field == "zipcode":
                 if zipCode.get() == "ZipCode":
                     zipCode.delete(0, END)
+            elif field == "storeName":
+                if storeName.get() == "Store Name":
+                    storeName.delete(0, END)
 
         
             
@@ -176,17 +293,23 @@ class UserDashboard():
         bookName.insert(0, "Name")
         bookName.bind("<FocusOut>", lambda event: focus_out("name"))
         bookName.bind("<FocusIn>", lambda event: focus_in("name"))
-        bookName.grid(padx=20, pady=20)
+        bookName.grid(row=0, column=0,padx=20, pady=20)
         # canvas.create_line(width=25)
 
         zipCode = Entry(searchBar, background='#ECF2FF', font='Helvitica 10 bold', foreground='#665A48', width=30, border=1, highlightthickness=0)
         zipCode.insert(0, "ZipCode")
         zipCode.bind("<FocusOut>", lambda event: focus_out("zipcode"))
         zipCode.bind("<FocusIn>", lambda event: focus_in("zipcode"))
-        zipCode.grid(padx=20, pady=20)
+        zipCode.grid(row=0, column=1,padx=20, pady=20)
+
+        storeName = Entry(searchBar, background='#ECF2FF', font='Helvitica 10 bold', foreground='#665A48', width=30, border=1, highlightthickness=0)
+        storeName.insert(0, "Store Name")
+        storeName.bind("<FocusOut>", lambda event: focus_out("storeName"))
+        storeName.bind("<FocusIn>", lambda event: focus_in("storeName"))
+        storeName.grid(row=0, column=2,padx=20, pady=20)
 
         search = Button(searchBar, image=self.searchImg, command=searchBook, compound=RIGHT, text='Search', background='#ECF2FF',font='Helvitica 10 bold', border=1)
-        search.grid(ipadx=5, ipady=5, pady=10)
+        search.grid(row=0, column=3,ipadx=5, ipady=5, pady=10)
 
         
         def bookInfo(event):
@@ -206,45 +329,48 @@ class UserDashboard():
             
             # listDetails.delete(0, END)
             detailsLabel = ttk.Label(bookDetailsFrame, image=self.Bimg)
-            detailsLabel.pack()
+            detailsLabel.grid(row=0, column=4)
 
-            Label(bookDetailsFrame,text="Book Name:", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][0]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame,text="Book Name", bg='#D8D9CF').grid(row=1, column=0)
+            Label(bookDetailsFrame, text=str(book_data[0][0]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=0, ipadx=10)
 
-            Label(bookDetailsFrame, text="Price", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][1]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Price", bg='#D8D9CF').grid(row=1, column=2)
+            Label(bookDetailsFrame, text=str(book_data[0][1]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=2, ipadx=10)
 
-            Label(bookDetailsFrame, text="Author", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][2]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Author", bg='#D8D9CF').grid(row=1, column=3)
+            Label(bookDetailsFrame, text=str(book_data[0][2]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=3, ipadx=10)
 
-            Label(bookDetailsFrame, text="Published Year", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][3]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Published Year", bg='#D8D9CF').grid(row=1, column=4)
+            Label(bookDetailsFrame, text=str(book_data[0][3]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=4, ipadx=10)
 
-            Label(bookDetailsFrame, text="Store Name:", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][4]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Store Name", bg='#D8D9CF').grid(row=1, column=5)
+            Label(bookDetailsFrame, text=str(book_data[0][4]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=5, ipadx=10)
 
-            Label(bookDetailsFrame, text="Quantity", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][5]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Quantity", bg='#D8D9CF').grid(row=1, column=6)
+            Label(bookDetailsFrame, text=str(book_data[0][5]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=6, ipadx=10)
 
-            Label(bookDetailsFrame, text="Publisher Name:", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][6]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Publisher Name", bg='#D8D9CF').grid(row =1, column=7)
+            Label(bookDetailsFrame, text=str(book_data[0][6]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=7, ipadx=10)
             if book_data[0][5] != 0:
-                Button(bookDetailsFrame, text='Register Book').pack(pady=20)
+                Button(bookDetailsFrame, text='Register Book').grid(row=3, column=4,padx=20)
             else:
-                Button(bookDetailsFrame, text='Notify Me').pack()
+                Button(bookDetailsFrame, text='Notify Me').grid(row=3, column=4,padx=20)
         
-        list_books = Listbox(self.centerFrame, width=40, height=30, bd=0, border=0, highlightthickness=0)
-        scroll_bar = Scrollbar(self.centerFrame, orient=VERTICAL, bd=0, border=0, highlightthickness=0)
-        list_books.grid(row=0, column=1, padx=(10,0), pady=10, sticky=N)
+        detailsFrame = LabelFrame(self.centerFrame, width=300, height=200, text='Searched Books', bg='#9bc9ff')
+        detailsFrame.grid(row=1, column=0, sticky=W)
+
+        list_books = Listbox(detailsFrame, width=40, height=30, bd=0, border=0, highlightthickness=0)
+        scroll_bar = Scrollbar(detailsFrame, orient=VERTICAL, bd=0, border=0, highlightthickness=0)
+        list_books.grid(row=1, column=0, padx=(10,0), pady=10, sticky=W)
         scroll_bar.config(command=list_books.yview)
         list_books.config(yscrollcommand=scroll_bar.set)
-        scroll_bar.grid(row=0, column=2, sticky=N+S+E)
+        scroll_bar.grid(row=1, column=1, sticky=N+S+W)
 
         # list details
         # listDetails = Listbox(self.centerFrame, width=80, height=30, bd=2)
         # listDetails.grid(row=0, column=1, padx=(10,0), pady=10, sticky=N)
-        bookDetailsFrame = Frame(self.centerFrame, background='#D8D9CF')
-        bookDetailsFrame.grid(row=0, column=3, sticky=N, padx=20, ipadx=50, ipady=20)
+        bookDetailsFrame = Frame(detailsFrame, background='#D8D9CF')
+        bookDetailsFrame.grid(row=1, column=2, sticky=N, padx=20, ipadx=50, ipady=20)
 
         bookInfo('')
 
@@ -275,13 +401,18 @@ class UserDashboard():
         title.pack(side=LEFT)
 
         # User Profile logo and name
-        userProfile = ttk.Label(self.leftFrame,padding=50, image=self.Pimg, compound=TOP, text=self.userDetails[0][0], style='profile.TLabel')
-        userProfile.pack(fill=X)
+        userProfile = ttk.Label(self.leftFrame,justify=CENTER, padding=25, image=self.Pimg, compound=TOP, text=self.userDetails[0][0], style='profile.TLabel')
+        userProfile.pack(fill=BOTH)
+
+        viewProfile = ttk.Button(self.leftFrame, text="View Profile", image=self.PSimg, style="navButton.TButton", compound=LEFT, command=self.viewProfile)
+        viewProfile.pack()
 
 
         # ---------------------------- Navbar -----------------------------------------
 
         # Add required Nav bar items
+
+
 
         # Dashboard
         dashboard = ttk.Button(self.leftFrame, text="Dashboard", image=self.dImg, style="navButton.TButton", compound=LEFT, command=self.loadDashboard)
@@ -291,11 +422,32 @@ class UserDashboard():
         search = ttk.Button(self.leftFrame, text="Search     ", image=self.sImg, style="navButton.TButton", compound=LEFT, command=self.loadSearchPage)
         search.pack()
 
+        # Search Book
+        yourOrders = ttk.Button(self.leftFrame, text="Your Orders", image=self.orderImg, style="navButton.TButton", compound=LEFT, command=self.loadOrders)
+        yourOrders.pack()
+
         # Exit
         logout = ttk.Button(self.leftFrame, text="Logout ", image=self.logoutImg, style="navButton.TButton", compound=LEFT, command=self.logout)
         logout.pack()
 
         self.root.mainloop()
+
+    # Register the book
+    def registerBook(self, bookData):
+        def convertTimestampToSQLDateTime():
+            return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())
+
+        def convertSQLDateTimeToTimestamp(value):
+            return time.mktime(time.strptime(value, '%Y-%m-%d %H:%M:%S'))
+        
+        print(bookData)
+        bookName = bookData[0]
+        bookStore = bookData[4]
+        bookCost = bookData[1]
+        tran_time = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
+        user_name = self.userDetails[0][0]
+        self.db.registerBook(user_name, bookName, bookStore, bookCost, tran_time)
+        messagebox.showinfo(title='Success', message='Book registered successfully.. Check in Your Orders section')
 
     def AllBooks(self):
 
@@ -339,16 +491,26 @@ class UserDashboard():
             Label(bookDetailsFrame, text="Publisher Name:", bg='#D8D9CF').pack()
             Label(bookDetailsFrame, text=str(book_data[0][6]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
             if book_data[0][5] != 0:
-                Button(bookDetailsFrame, text='Register Book').pack(pady=20)
+                Button(bookDetailsFrame, text='Register Book', command=partial(self.registerBook,book_data[0])).pack(pady=20)
             else:
                 Button(bookDetailsFrame, text='Notify Me').pack()
+        
+        def getZipCodes():
+            query = "SELECT admin.* from books INNER JOIN admin ON admin.name=books.book_store"
+            self.db.cursor.execute(query)
+            data = self.db.cursor.fetchall()
+            print("ZipCode:",data)
+            zipCodes = []
+            for d in data:
+                zipCodes.append(d[4])
+            
+            return zipCodes
 
-
+                
 
         def displayBooks():
             self.db.cursor.execute("SELECT * FROM books")
             books = self.db.cursor.fetchall()
-            
             print(books)
             count = 0
             if len(books) == 0:
@@ -371,6 +533,7 @@ class UserDashboard():
 
 
         displayBooks()
+        getZipCodes()
         # list details
         # listDetails = Listbox(self.centerFrame, width=80, height=30, bd=2)
         # listDetails.grid(row=0, column=1, padx=(10,0), pady=10, sticky=N)
@@ -379,6 +542,7 @@ class UserDashboard():
 
         bookInfo('')
 # AdminDashboard("Nothing").dashboard()
+# UserDashboard([["H Man", "hman@gmail.com", 887674893, "Pass@123"]]).dashboard()
 # UserDashboard([["Prasad"]]).dashboard()
 
 

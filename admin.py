@@ -282,11 +282,24 @@ class Admin():
                 return False  
             return True
 
+ 
+        # Define a function for
+        # for validating an Email
+        def checkEmail(email):
+            regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+
+            if(re.fullmatch(regex, email)):
+                return True
+            else:
+                return False
+
         def signUp():
             if name.get() == '' or userName.get() == '' or password.get() == '' or contact.get() == '':
                 messagebox.askokcancel(title= 'Error!', message='Required fields missing?')
             elif not validate_password(password.get()):
                 messagebox.askokcancel(title= 'Error!', message='Password should contain A-Z, a-z, 0-9 and lenght 8')
+            elif not checkEmail(userName.get()):
+                messagebox.askokcancel(title= 'Error!', message='Please enter a valid Email!!')
             else:
                 self.db.addNewAdmin(name.get(), userName.get(), password.get(), contact.get(), zipCode.get())
                 messagebox.showinfo(title='Success', message='Registered successfully!!')
