@@ -24,10 +24,10 @@ class Database:
         except mysql.connector.Error as e:
             print("Failed to create a Admin: "+e.msg)
 
-    def registerBook(self, user_name, bookName, store_name, price, time):
+    def registerBook(self, user_name, bookName, store_name, price, time, userEmail, storeEmail):
         try:
             
-            query="INSERT INTO transaction ( book_name, store_name, user_name, book_cost, transaction_time) VALUES('"+ bookName +"', '"+store_name+"', '"+ user_name+"', {0}, '{1}')".format(price, time)
+            query="INSERT INTO transaction ( book_name, store_name, user_name, book_cost, transaction_time, user_email, store_email) VALUES('"+ bookName +"', '"+store_name+"', '"+ user_name+"', {0}, '{1}','{2}','{3}')".format(price, time,userEmail, storeEmail)
             print(query)
             self.cursor.execute(query)
             self.connection.commit()
@@ -120,7 +120,7 @@ class Database:
             print("Failed to create a user: "+e.msg)
             return []
 
-    def addNewBook(self, name, price, publisher_name, published_year, book_store, quantity, author):
+    def addNewBook(self, name, price, publisher_name, published_year, book_store, quantity, author, store_email):
         try:  
             bookExists = self.checkBookExists(name=name)
             print(bookExists)
@@ -128,7 +128,7 @@ class Database:
                 quantity = str(int(quantity) + int(bookExists[0][5]))
                 query = "UPDATE books SET quantity = "+ quantity+" WHERE name='"+name+"'"
             else:
-                query="INSERT INTO books ( name, price, author, published_year, book_store, quantity, publisher) VALUES('"+ name +"', '"+price+"', '"+ author+"', '"+ published_year+"', '"+ book_store+"', '"+ quantity+"', '"+ publisher_name+"')"
+                query="INSERT INTO books ( name, price, author, published_year, book_store, quantity, publisher, store_email) VALUES('"+ name +"', '"+price+"', '"+ author+"', '"+ published_year+"', '"+ book_store+"', '"+ quantity+"', '"+ publisher_name+"', '"+store_email+"')"
             self.cursor.execute(query)
             self.connection.commit()
             # cursor.execute("INSERT INTO Admin ( name, email, password, contact) VALUES(  '"+ name +"', '"+email+", "+ password+"', "+ contact+" )")

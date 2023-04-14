@@ -5,6 +5,9 @@ import time
 from tkinter import Tk, messagebox, ttk
 from tkinter import *
 from PIL import Image, ImageTk
+import imageio
+import mysql.connector
+
 
 from db import Database
 # from main import App
@@ -133,8 +136,16 @@ class UserDashboard():
 
     def viewProfile(self):
         print("profile", self.userDetails)
-        def updateAdmin():
-            pass
+        def updateUser():
+            try:
+                query = "UPDATE user SET name='{0}', password='{1}', contact={2} WHERE email='{3}'".format(name.get(), password.get(), contact.get(), email.get())
+                self.db.cursor.execute(query)
+                self.db.connection.commit()
+                window.destroy()
+                messagebox.showinfo(title='Success', message='User Details updated Successfully!!\n To apply changes need to login again!!')
+                self.root.destroy()
+            except mysql.connector.Error as e:
+                print(e)
 
         window=Tk()
         mainFrame = Frame(window, bg='#EDE4E0')
@@ -143,31 +154,34 @@ class UserDashboard():
         labelFrame.pack(expand=True, fill=X)
         nameLabel = Label(labelFrame, text='Name',  bg='#EDE4E0', font='lucida 10 bold')
         nameLabel.pack(pady=2)
-        bookName = ttk.Entry(labelFrame, width=30)
-        bookName.insert(0, self.userDetails[0][0])
-        bookName.pack(pady=2)
-        quantityLabel = Label(labelFrame, text='Email',  bg='#EDE4E0', font='lucida 10 bold')
-        quantityLabel.pack(pady=2)
-        quantity = ttk.Entry(labelFrame, width=30)
-        quantity.insert(0, self.userDetails[0][1])
+        name = ttk.Entry(labelFrame, width=30)
+        name.insert(0, self.userDetails[0][0])
+        name.pack(pady=2)
 
-        quantity.pack(pady=2)
+        emailLabel = Label(labelFrame, text='Email',  bg='#EDE4E0', font='lucida 10 bold')
+        emailLabel.pack(pady=2)
+        email = ttk.Entry(labelFrame, width=30)
+        email.insert(0, self.userDetails[0][1])
+
+        email.pack(pady=2)
+        email.config(state=DISABLED)
         
-        pbNameLabel = Label(labelFrame, text='Contact',  bg='#EDE4E0', font='lucida 10 bold')
-        pbNameLabel.pack(pady=2)
-        pbName = ttk.Entry(labelFrame, width=30)
-        pbName.insert(0, self.userDetails[0][2])
+        contactLabel = Label(labelFrame, text='Contact',  bg='#EDE4E0', font='lucida 10 bold')
+        contactLabel.pack(pady=2)
+        contact = ttk.Entry(labelFrame, width=30)
+        contact.insert(0, self.userDetails[0][2])
 
-        pbName.pack(pady=2)
-        pbYearLabel = Label(labelFrame, text='Password',  bg='#EDE4E0', font='lucida 10 bold')
-        pbYearLabel.pack(pady=2)
-        pbYear = ttk.Entry(labelFrame, width=30)
-        pbYear.insert(0, self.userDetails[0][3])
+        contact.pack(pady=2)
 
-        pbYear.pack(pady=2)
+        passwordLabel = Label(labelFrame, text='Password',  bg='#EDE4E0', font='lucida 10 bold')
+        passwordLabel.pack(pady=2)
+        password = ttk.Entry(labelFrame, width=30)
+        password.insert(0, self.userDetails[0][3])
 
-        addBook = Button(labelFrame, text="Update Profile", command= updateAdmin)
-        addBook.pack(pady=20)
+        password.pack(pady=2)
+
+        update = Button(labelFrame, text="Update Profile", command= updateUser)
+        update.pack(pady=20)
 
     def viewOrdersPage(self, data, subData):
         window=Tk()
@@ -182,6 +196,10 @@ class UserDashboard():
         e.grid(row=0,column=3)
         e=Label(window,width=20,text='Transcation time',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
         e.grid(row=0,column=4)
+        e=Label(window,width=20,text='User Email',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=5)
+        e=Label(window,width=20,text='Store Email',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=6)
         i=1
         for transaction in data: 
             for j in range(len(transaction)):
@@ -201,7 +219,7 @@ class UserDashboard():
     # Load Orders
     def loadOrders(self):
         self.clearFrame()
-        query = "SELECT * FROM transaction WHERE user_name='"+self.userDetails[0][0] + "'"
+        query = "SELECT * FROM transaction WHERE user_email='"+self.userDetails[0][1] + "'"
         self.db.cursor.execute(query)
         data = self.db.cursor.fetchall()
         # if len(data):
@@ -271,9 +289,9 @@ class UserDashboard():
             elif field == "zipcode":
                 if zipCode.get() == "":
                     zipCode.insert(0, "ZipCode")
-            elif field == "storeName":
-                if storeName.get() == "":
-                    storeName.insert(0, "Store Name")
+            # elif field == "storeName":
+            #     if storeName.get() == "":
+            #         storeName.insert(0, "Store Name")
         
         def focus_in(field):
             # print('focus in: ', userName.get())
@@ -283,9 +301,9 @@ class UserDashboard():
             elif field == "zipcode":
                 if zipCode.get() == "ZipCode":
                     zipCode.delete(0, END)
-            elif field == "storeName":
-                if storeName.get() == "Store Name":
-                    storeName.delete(0, END)
+            # elif field == "storeName":
+            #     if storeName.get() == "Store Name":
+            #         storeName.delete(0, END)
 
         
             
@@ -302,11 +320,11 @@ class UserDashboard():
         zipCode.bind("<FocusIn>", lambda event: focus_in("zipcode"))
         zipCode.grid(row=0, column=1,padx=20, pady=20)
 
-        storeName = Entry(searchBar, background='#ECF2FF', font='Helvitica 10 bold', foreground='#665A48', width=30, border=1, highlightthickness=0)
-        storeName.insert(0, "Store Name")
-        storeName.bind("<FocusOut>", lambda event: focus_out("storeName"))
-        storeName.bind("<FocusIn>", lambda event: focus_in("storeName"))
-        storeName.grid(row=0, column=2,padx=20, pady=20)
+        # storeName = Entry(searchBar, background='#ECF2FF', font='Helvitica 10 bold', foreground='#665A48', width=30, border=1, highlightthickness=0)
+        # storeName.insert(0, "Store Name")
+        # storeName.bind("<FocusOut>", lambda event: focus_out("storeName"))
+        # storeName.bind("<FocusIn>", lambda event: focus_in("storeName"))
+        # storeName.grid(row=0, column=2,padx=20, pady=20)
 
         search = Button(searchBar, image=self.searchImg, command=searchBook, compound=RIGHT, text='Search', background='#ECF2FF',font='Helvitica 10 bold', border=1)
         search.grid(row=0, column=3,ipadx=5, ipady=5, pady=10)
@@ -352,7 +370,7 @@ class UserDashboard():
             Label(bookDetailsFrame, text="Publisher Name", bg='#D8D9CF').grid(row =1, column=7)
             Label(bookDetailsFrame, text=str(book_data[0][6]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=7, ipadx=10)
             if book_data[0][5] != 0:
-                Button(bookDetailsFrame, text='Register Book').grid(row=3, column=4,padx=20)
+                Button(bookDetailsFrame, text='Register Book', command=partial(self.registerBook, book_data[0])).grid(row=3, column=4,padx=20)
             else:
                 Button(bookDetailsFrame, text='Notify Me').grid(row=3, column=4,padx=20)
         
@@ -375,10 +393,41 @@ class UserDashboard():
         bookInfo('')
 
     def logout(self):
+        self.playVideoAd()
         self.clearFrame()
         self.root.destroy()
 
-    
+    # To play video ad
+    def playVideoAd(self):
+
+        def stream():
+            try:
+                image = video.get_next_data()
+                frame_image = Image.fromarray(image)
+                frame_image=ImageTk.PhotoImage(frame_image)
+                l1.config(image=frame_image)
+                l1.image = frame_image
+                l1.after(delay, lambda: stream())
+            except:
+                video.close()
+                return 
+        self.root.destroy()
+        window = Tk()
+        window.title('Video Ad')
+        f1=Frame(window)
+        f1.pack()
+        l2 = Label(f1, text="Book will get registered after this ad. You can close the ad as well!!", font='Helvitica 15 bold')
+        l2.pack()
+        l1 = Label(f1)
+        l1.pack()
+        video_name = "./assets/CMU.mp4"   #Image-path
+        video = imageio.get_reader(video_name)
+        delay = int(60 / video.get_meta_data()['fps'])
+        stream()
+        window.mainloop() 
+
+    def relaunchDashboard(self):
+        UserDashboard(self.userDetails).dashboard()
 
     def dashboard(self):
         # top frame
@@ -432,22 +481,22 @@ class UserDashboard():
 
         self.root.mainloop()
 
+        
     # Register the book
     def registerBook(self, bookData):
-        def convertTimestampToSQLDateTime():
-            return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())
-
-        def convertSQLDateTimeToTimestamp(value):
-            return time.mktime(time.strptime(value, '%Y-%m-%d %H:%M:%S'))
-        
+        self.playVideoAd()
         print(bookData)
         bookName = bookData[0]
         bookStore = bookData[4]
         bookCost = bookData[1]
         tran_time = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
         user_name = self.userDetails[0][0]
-        self.db.registerBook(user_name, bookName, bookStore, bookCost, tran_time)
+        self.db.cursor.execute("select email from Admin where name='{}'".format(bookStore))
+        adminEmail = self.db.cursor.fetchall()
+        print(adminEmail)
+        self.db.registerBook(user_name, bookName, bookStore, bookCost, tran_time, self.userDetails[0][1], adminEmail[0][0])
         messagebox.showinfo(title='Success', message='Book registered successfully.. Check in Your Orders section')
+        self.relaunchDashboard()
 
     def AllBooks(self):
 
@@ -505,8 +554,7 @@ class UserDashboard():
                 zipCodes.append(d[4])
             
             return zipCodes
-
-                
+        
 
         def displayBooks():
             self.db.cursor.execute("SELECT * FROM books")
@@ -542,7 +590,7 @@ class UserDashboard():
 
         bookInfo('')
 # AdminDashboard("Nothing").dashboard()
-# UserDashboard([["H Man", "hman@gmail.com", 887674893, "Pass@123"]]).dashboard()
+# UserDashboard([('E Prasad', 'end@gmail.com', '987654321', '12345')]).dashboard()
 # UserDashboard([["Prasad"]]).dashboard()
 
 

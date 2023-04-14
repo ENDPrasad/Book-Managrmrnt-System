@@ -3,7 +3,7 @@ from functools import partial
 from tkinter import Tk, messagebox, ttk
 from tkinter import *
 from PIL import Image, ImageTk
-
+import mysql.connector
 from db import Database
 
 class AdminDashboard():
@@ -180,6 +180,10 @@ class AdminDashboard():
         e.grid(row=0,column=3)
         e=Label(window,width=20,text='Transcation time',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
         e.grid(row=0,column=4)
+        e=Label(window,width=20,text='Store Email',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=5)
+        e=Label(window,width=20,text='User Email',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=6)
         i=1
         for transaction in data: 
             for j in range(len(transaction)):
@@ -482,7 +486,7 @@ class AdminDashboard():
         def updateBook(bookData):
             print("update: ", bookData)
             try:
-                query = "UPDATE books SET name='{0}', publisher='{1}', published_year={2}, book_store='{3}', quantity={4}, price={5}, author='{6}' WHERE id={7}".format(bookName.get(), pbName.get(), pbYear.get(), self.adminDetails[0][0], quantity.get(), price.get(), author.get(), bookData[6])
+                query = "UPDATE books SET name='{0}', publisher='{1}', published_year={2}, book_store='{3}', quantity={4}, price={5}, author='{6}', store_email='{8}' WHERE id={7}".format(bookName.get(), pbName.get(), pbYear.get(), self.adminDetails[0][0], quantity.get(), price.get(), author.get(), bookData[6], self.adminDetails[0][1])
                 # self.db.addNewBook(name=bookName.get(), publisher_name=pbName.get(), published_year=pbYear.get(),book_store=self.adminDetails[0][0],quantity=quantity.get(), price=price.get(), author=author.get())
                 self.db.cursor.execute(query)
                 data = self.db.cursor.fetchall()
@@ -499,7 +503,7 @@ class AdminDashboard():
         def addNewBook():
             print("add book")
             try:
-                self.db.addNewBook(name=bookName.get(), publisher_name=pbName.get(), published_year=pbYear.get(),book_store=self.adminDetails[0][0],quantity=quantity.get(), price=price.get(), author=author.get())
+                self.db.addNewBook(name=bookName.get(), publisher_name=pbName.get(), published_year=pbYear.get(),book_store=self.adminDetails[0][0],quantity=quantity.get(), price=price.get(), author=author.get(), store_email=self.adminDetails[0][1])
                 messagebox.askokcancel("Success", "Book added successfully!!")
                 window.destroy()
             except Exception as ex:
@@ -572,7 +576,16 @@ class AdminDashboard():
     def viewProfile(self):
         print("profile", self.adminDetails)
         def updateAdmin():
-            pass
+            try:
+                query = "UPDATE Admin SET name='{0}', password='{1}', contact={2}, zipCode={3} WHERE email='{4}'".format(name.get(), password.get(), contact.get(), zipcode.get(), email.get())
+                self.db.cursor.execute(query)
+                self.db.connection.commit()
+                window.destroy()
+                messagebox.showinfo(title='Success', message='Admin Details updated Successfully!!\n To apply changes need to login again!!')
+                self.root.destroy()
+
+            except mysql.connector.Error as e:
+                print(e)
 
         window=Tk()
         mainFrame = Frame(window, bg='#EDE4E0')
@@ -581,36 +594,37 @@ class AdminDashboard():
         labelFrame.pack(expand=True, fill=X)
         nameLabel = Label(labelFrame, text='Name',  bg='#EDE4E0', font='lucida 10 bold')
         nameLabel.pack(pady=2)
-        bookName = ttk.Entry(labelFrame, width=30)
-        bookName.insert(0, self.adminDetails[0][0])
-        bookName.pack(pady=2)
-        quantityLabel = Label(labelFrame, text='Email',  bg='#EDE4E0', font='lucida 10 bold')
-        quantityLabel.pack(pady=2)
-        quantity = ttk.Entry(labelFrame, width=30)
-        quantity.insert(0, self.adminDetails[0][1])
+        name = ttk.Entry(labelFrame, width=30)
+        name.insert(0, self.adminDetails[0][0])
+        name.pack(pady=2)
+        emailLabel = Label(labelFrame, text='Email',  bg='#EDE4E0', font='lucida 10 bold')
+        emailLabel.pack(pady=2)
+        email = ttk.Entry(labelFrame, width=30)
+        email.insert(0, self.adminDetails[0][1])
 
-        quantity.pack(pady=2)
+        email.pack(pady=2)
+        email.config(state=DISABLED)
         
-        pbNameLabel = Label(labelFrame, text='Contact',  bg='#EDE4E0', font='lucida 10 bold')
-        pbNameLabel.pack(pady=2)
-        pbName = ttk.Entry(labelFrame, width=30)
-        pbName.insert(0, self.adminDetails[0][2])
+        contactLabel = Label(labelFrame, text='Contact',  bg='#EDE4E0', font='lucida 10 bold')
+        contactLabel.pack(pady=2)
+        contact = ttk.Entry(labelFrame, width=30)
+        contact.insert(0, self.adminDetails[0][2])
 
-        pbName.pack(pady=2)
-        pbYearLabel = Label(labelFrame, text='Password',  bg='#EDE4E0', font='lucida 10 bold')
-        pbYearLabel.pack(pady=2)
-        pbYear = ttk.Entry(labelFrame, width=30)
-        pbYear.insert(0, self.adminDetails[0][3])
+        contact.pack(pady=2)
+        passwordLabel = Label(labelFrame, text='Password',  bg='#EDE4E0', font='lucida 10 bold')
+        passwordLabel.pack(pady=2)
+        password = ttk.Entry(labelFrame, width=30)
+        password.insert(0, self.adminDetails[0][3])
 
-        pbYear.pack(pady=2)
-        priceLabel = Label(labelFrame, text='Zip Code',  bg='#EDE4E0', font='lucida 10 bold')
-        priceLabel.pack(pady=2)
-        price = ttk.Entry(labelFrame, width=30)
-        price.insert(0, self.adminDetails[0][4])
-        price.pack(pady=2)
+        password.pack(pady=2)
+        zipcodeLabel = Label(labelFrame, text='Zip Code',  bg='#EDE4E0', font='lucida 10 bold')
+        zipcodeLabel.pack(pady=2)
+        zipcode = ttk.Entry(labelFrame, width=30)
+        zipcode.insert(0, self.adminDetails[0][4])
+        zipcode.pack(pady=2)
 
-        addBook = Button(labelFrame, text="Update Profile", command= updateAdmin)
-        addBook.pack(pady=20)
+        update = Button(labelFrame, text="Update Profile", command= updateAdmin)
+        update.pack(pady=20)
 
     def dashboard(self):
         # top frame
@@ -719,7 +733,7 @@ class AdminDashboard():
                 pass
             
         def displayBooks():
-            self.db.cursor.execute("SELECT * FROM books where book_store ='"+self.adminDetails[0][0]+"'")
+            self.db.cursor.execute("SELECT * FROM books where store_email ='"+self.adminDetails[0][1]+"'")
             books = self.db.cursor.fetchall()
             print(books)
             count = 0
@@ -727,7 +741,7 @@ class AdminDashboard():
                 list_books.destroy()
                 scroll_bar.destroy()
                 bookDetailsFrame.destroy()
-                Label(self.centerFrame, image=self.Noimg,compound=TOP, text="No books are there in your store!!", background='#D8D9CF', font='Helvitica 20 bold').grid(row=0, column=0, rowspan=1, columnspan=1, ipadx=100)
+                Label(self.centerFrame, image=self.Noimg,compound=TOP, text="No books are there in your store!!", background='#D8D9CF', font='Helvitica 20 bold').pack(ipadx=100, side=TOP)
                 return
             list_books.delete(0, END)
             for book in books:
