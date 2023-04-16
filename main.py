@@ -11,6 +11,7 @@ class App():
 
     def __init__(self) -> None:
         self.root = Tk()
+        self.root.title("Book Information System")
 
         # Screen resolution
         self.width = self.root.winfo_screenwidth()
@@ -40,7 +41,7 @@ class App():
 
         topFrame = ttk.Frame(self.root, width=curr_width, height=50, style='frame.TFrame')
         topFrame.pack(side=TOP, fill=X)
-        label = Label(topFrame, text='Book Management System',image=logoImg,compound=LEFT, font='lucida 25 bold', bg='#E5BA73')
+        label = Label(topFrame, text='Book Information System',image=logoImg,compound=LEFT, font='lucida 25 bold', bg='#E5BA73')
         label.pack(ipady=10, fill=X)
 
         # Admin Image

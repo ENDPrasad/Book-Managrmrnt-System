@@ -1,4 +1,5 @@
 
+import datetime
 from functools import partial
 from tkinter import Tk, messagebox, ttk
 from tkinter import *
@@ -18,6 +19,7 @@ class AdminDashboard():
         # Initialise the tkinter
         self.root = Tk()
         # Screen resolution
+        self.root.title("Book Information System Dashboard")
         self.width = self.root.winfo_screenwidth()
         self.height = self.root.winfo_screenheight()
         print(self.width, self.height)
@@ -61,8 +63,16 @@ class AdminDashboard():
         # left frame
         self.leftFrame = ttk.Frame(self.root, height=self.height-100, width=200, border=2, style='left.TFrame')
 
+        # Info image
+        infoImage = (Image.open("./assets/idea.png"))
+        infoImage = infoImage.resize((200, 200))
+        self.infoImg = ImageTk.PhotoImage(image=infoImage)
+
         # center Frame
         self.centerFrame = ttk.Frame(self.root, height=self.height-70, width=self.width-100, border=2, style='center.TFrame')
+
+        Label(self.centerFrame,image=self.infoImg, compound=TOP, text="Click on the Required section to get the data..", font='Helvitica 20 bold', bg=self.centerFrameColor).pack(fill=BOTH, ipadx=300, ipady=100)
+
 
 
         # --------------------- Images --------------------------------------------
@@ -114,6 +124,8 @@ class AdminDashboard():
         ProfileImage = ProfileImage.resize((100, 100))
         self.Pimg = ImageTk.PhotoImage(image=ProfileImage)
 
+        
+
         # profile small image
         ProfileSImage = ProfileImage.resize((30, 30))
         self.PSimg = ImageTk.PhotoImage(image=ProfileSImage)
@@ -137,6 +149,11 @@ class AdminDashboard():
         allImage = (Image.open("./assets/bookshelf.png"))
         allImage = allImage.resize((100, 100))
         self.allImg = ImageTk.PhotoImage(image=allImage)
+
+        # total Books image
+        feedbackImage = (Image.open("./assets/good-feedback.png"))
+        feedbackImage = feedbackImage.resize((100, 100))
+        self.feedbackImg = ImageTk.PhotoImage(image=feedbackImage)
 
         # count image
         countImage = (Image.open("./assets/countdown.png"))
@@ -169,6 +186,7 @@ class AdminDashboard():
 
     def viewOrdersPage(self, data, subData):
         window=Tk()
+        window.title("Orders")
         print(data)
         e=Label(window,width=20,text='Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
         e.grid(row=0,column=0)
@@ -213,8 +231,8 @@ class AdminDashboard():
             print(value)
             print(code)
             print(type(zipCode.get()))
-            nameQuery = "books.name LIKE '%"+value+"%'"
-            query = "SELECT books.* FROM books INNER JOIN Admin ON Admin.name = books.book_store WHERE "
+            nameQuery = " AND books.name LIKE '%"+value+"%'"
+            query = "SELECT * from books where store_email='{0}'".format(self.adminDetails[0][1])
             if value != "Name" and code == "ZipCode":
                  query += nameQuery
             elif value != "Name" and code != "ZipCode":
@@ -235,9 +253,11 @@ class AdminDashboard():
                     list_books.insert(count, str(count+1)+"."+data[0])
                     count += 1
                 list_books.bind("<<ListboxSelect>>", bookInfo)
+        
+        Label(self.centerFrame, text="Search Bar", font='Helvitica 20 bold', bg=self.centerFrameColor).grid(column=0, row=0)
         # search bar
         searchBar = LabelFrame(self.centerFrame, width=300, height=200, text='Search box', bg='#9bc9ff')
-        searchBar.grid(row=0, column=0, sticky=N)
+        searchBar.grid(row=1, column=0, sticky=N)
 
         def focus_out(field):
             # print('focus out:', userName.get())
@@ -285,7 +305,8 @@ class AdminDashboard():
         # storeName.grid(row=0, column=2,padx=20, pady=20)
 
         search = Button(searchBar, image=self.searchImg, command=searchBook, compound=RIGHT, text='Search', background='#ECF2FF',font='Helvitica 10 bold', border=1)
-        search.grid(row=0, column=2,ipadx=5, ipady=5, pady=10, padx=10)
+        search.grid(row=0, column=3,ipadx=5, ipady=5, pady=10)
+
         
         def bookInfo(event):
             book_data = ''
@@ -303,7 +324,6 @@ class AdminDashboard():
                 widget.destroy()
             
             # listDetails.delete(0, END)
-
             detailsLabel = ttk.Label(bookDetailsFrame, image=self.Bimg)
             detailsLabel.grid(row=0, column=4)
 
@@ -327,18 +347,10 @@ class AdminDashboard():
 
             Label(bookDetailsFrame, text="Publisher Name", bg='#D8D9CF').grid(row =1, column=7)
             Label(bookDetailsFrame, text=str(book_data[0][6]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=7, ipadx=10)
-
-            Label(bookDetailsFrame, text="ZipCode", bg='#D8D9CF').grid(row =1, column=8)
-            Label(bookDetailsFrame, text=str(book_data[0][7]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=8, ipadx=10)
-            if book_data[0][5] != 0:
-                Button(bookDetailsFrame, text='Register Book').grid(row=4, column=4,pady=20)
-            else:
-                Button(bookDetailsFrame, text='Notify Me').grid(row=4, column=4,pady=20)
         
         detailsFrame = LabelFrame(self.centerFrame, width=300, height=200, text='Searched Books', bg='#9bc9ff')
-        detailsFrame.grid(row=1, column=0, sticky=W)
-        Label(detailsFrame, text="Searched Books List", font='Helvitica 12 bold', bg=self.centerFrameColor).grid(row=0, column=0)
-        Label(detailsFrame, text="Book Details", font='Helvitica 12 bold',bg=self.centerFrameColor).grid(row=0, column=2)
+        detailsFrame.grid(row=2, column=0, sticky=W)
+
         list_books = Listbox(detailsFrame, width=40, height=30, bd=0, border=0, highlightthickness=0)
         scroll_bar = Scrollbar(detailsFrame, orient=VERTICAL, bd=0, border=0, highlightthickness=0)
         list_books.grid(row=1, column=0, padx=(10,0), pady=10, sticky=W)
@@ -353,6 +365,7 @@ class AdminDashboard():
         bookDetailsFrame.grid(row=1, column=2, sticky=N, padx=20, ipadx=50, ipady=20)
 
         bookInfo('')
+    
 
     def loadUpdateBookPage(self):
         self.clearFrame()
@@ -364,9 +377,12 @@ class AdminDashboard():
     def logout(self):
         self.clearFrame()
         self.root.destroy()
+
+    # Display unique books
     def displayUniqueBooks(self, data):
         window=Tk()
-        self.db.cursor.execute("SELECT * FROM books where book_store ='"+self.adminDetails[0][0]+"'")
+        window.title("Unique Book list")
+        self.db.cursor.execute("SELECT * FROM books where store_email ='"+self.adminDetails[0][1]+"'")
         books = self.db.cursor.fetchall()
         e=Label(window,width=20,text='Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
         e.grid(row=0,column=0)
@@ -384,14 +400,17 @@ class AdminDashboard():
         e.grid(row=0,column=6)
         i=1
         for student in books: 
-            for j in range(len(student)):
+            for j in range(len(student)-2):
                 e = Label(window, text=student[j]) 
-                e.grid(row=i, column=j) 
+                e.grid(row=i, column=j)
             i=i+1
+
 
     # Load Orders
     def loadOrders(self):
         self.clearFrame()
+
+        # Gives total earnings
         def totalEarnings():
             sum = 0
             for d in data:
@@ -405,6 +424,7 @@ class AdminDashboard():
             # Label(self.centerFrame, text=str(data[0])).pack()
         
         # Reports
+        Label(self.centerFrame, text="Orders Summary", font='Helvitica 20 bold', bg=self.centerFrameColor).grid(row=0, column=1)
         Frame(self.centerFrame, background=self.centerFrameColor).grid(row=0, column=4, ipadx=200)
 
         frame1 = Frame(self.centerFrame, background='#EDE4E0', width= 200, height=200)
@@ -437,12 +457,12 @@ class AdminDashboard():
     def loadReportsPage(self):
         self.clearFrame()
         self.style.configure("profile.TLabel", font='Helvitica 15 bold', background='#FFABAB')
-        self.db.cursor.execute("select * from books where book_store='"+self.adminDetails[0][0]+"'")
+        self.db.cursor.execute("select * from books where store_email='"+self.adminDetails[0][1]+"'")
         self.admin_books = self.db.cursor.fetchall()
         print('admin: ', self.admin_books)
         self.bookCount = len(self.admin_books)
         def getQunatity():
-            self.db.cursor.execute("SELECT * FROM books where book_store ='"+self.adminDetails[0][0]+"'")
+            self.db.cursor.execute("SELECT * FROM books where store_email ='"+self.adminDetails[0][1]+"'")
             books = self.db.cursor.fetchall()
             quantity = 0
             for book in books:
@@ -450,21 +470,27 @@ class AdminDashboard():
             return quantity
         
         def getlessQuantityBooks():
-            self.db.cursor.execute("SELECT * FROM books where book_store ='"+self.adminDetails[0][0]+"'")
+            self.db.cursor.execute("SELECT * FROM books where store_email ='"+self.adminDetails[0][1]+"'")
             books = self.db.cursor.fetchall()
-            lessQuantBook = "| "
+            lessQuantBook = ""
             for book in books:
                 if book[5] <= 5:
-                    lessQuantBook += book[0] + " | "
+                    lessQuantBook += "| " + book[0] + " | \n"
             return lessQuantBook
             
         # Reports
+        # Label(self.centerFrame, text="Reports", font='Helvitica 20 bold', bg=self.centerFrameColor).grid(column=2, row=0, ipady=100)
+        Label(self.centerFrame, bg=self.centerFrameColor).grid(column=0, row=0, ipady=100)
         frame1 = Frame(self.centerFrame, background='#EDE4E0', width= 200, height=200)
-        frame1.grid(row=0, column=0, rowspan=20, padx=30, ipadx=50)
+        frame1.grid(row=1, column=0, rowspan=20, padx=30, ipadx=50)
         frame2 = Frame(self.centerFrame, background='#EDE4E0')
-        frame2.grid(row=0, column=1, rowspan=20, padx=30, ipadx=50)
+        frame2.grid(row=1, column=1, rowspan=20, padx=30, ipadx=50)
         frame3 = Frame(self.centerFrame, background='#EDE4E0')
-        frame3.grid(row=0, column=2, rowspan=20, padx=30, ipadx=50)
+        frame3.grid(row=1, column=2, rowspan=20, padx=30, ipadx=50)
+        frame4 = Frame(self.centerFrame, background='#EDE4E0')
+        frame4.grid(row=1, column=3, rowspan=20, padx=30, ipadx=50)
+
+        Frame(self.centerFrame, background=self.centerFrameColor).grid(row=1, column=4, rowspan=20, padx=60, ipadx=50)
 
         uniqueBook = Label(frame1, image=self.stackImg,compound=TOP, text='Unique book count:', bg='#EDE4E0')
         uniqueBook.pack()
@@ -479,6 +505,36 @@ class AdminDashboard():
         lessQuantBooks = Label(frame3, text=str(getlessQuantityBooks()), background='#EDE4E0', font='Helvitica 15 bold')
         lessQuantBooks.pack()
 
+        query = "SELECT * FROM feedback WHERE store_email='"+self.adminDetails[0][1] + "'"
+        self.db.cursor.execute(query)
+        data = self.db.cursor.fetchall()
+        reviewCount = len(data) if len(data) > 0 else "0"
+        reviewLabel = Label(frame4, image=self.feedbackImg,compound=TOP, text='total reviews', bg='#EDE4E0')
+        reviewLabel.pack()
+        reviewLabel.bind("<Button-1>", partial(self.viewReviewPage,data))
+        reviewCountLabel = Label(frame4, text=str(reviewCount), background='#EDE4E0', font='Helvitica 15 bold')
+        reviewCountLabel.pack()
+        frame4.bind("<Button-1>", partial(self.viewReviewPage, data))
+
+    def viewReviewPage(self, data, subData):
+        window=Tk()
+        window.title("Your Reviews")
+
+        print(data)
+
+        e=Label(window,width=20,text='Comment',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=0)
+        e=Label(window,width=20,text='Store Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=1)
+        e=Label(window,width=20,text='Customer Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=2)
+       
+        i=1
+        for transaction in data: 
+            for j in range(1, 4):
+                e = Label(window, text=transaction[j]) 
+                e.grid(row=i, column=j-1) 
+            i=i+1
     
 
     def AddBook(self, data=['','','','','','','','','','','']):
@@ -512,6 +568,7 @@ class AdminDashboard():
                 window.destroy()
 
         window=Tk()
+        window.title("Add New Book/Update Book")
         mainFrame = Frame(window, bg='#EDE4E0')
         mainFrame.pack(fill=BOTH)
         labelFrame = LabelFrame(mainFrame, text='Add a book', bg='#EDE4E0',  highlightbackground='white', font='lucida 12 bold', relief='solid', padx=20)
@@ -588,6 +645,7 @@ class AdminDashboard():
                 print(e)
 
         window=Tk()
+        window.title("Profile Details")
         mainFrame = Frame(window, bg='#EDE4E0')
         mainFrame.pack(fill=BOTH)
         labelFrame = LabelFrame(mainFrame, text='Profile Details', bg='#EDE4E0',  highlightbackground='white', font='lucida 12 bold', relief='solid', padx=20)
@@ -643,7 +701,7 @@ class AdminDashboard():
 
 
         # Title
-        title = ttk.Label(self.topFrame, text="Book Management System", style='title.TLabel')
+        title = ttk.Label(self.topFrame, text="Book Information System", style='title.TLabel')
         title.pack(side=LEFT)
 
         # User Profile logo and name
@@ -751,11 +809,16 @@ class AdminDashboard():
         
         if calledFrom == "update":
             # updates
+            Label(self.centerFrame, text="Book Update/Add New Book", font='Helvitica 20 bold', bg=self.centerFrameColor).pack()
+
             frame1 = Frame(self.centerFrame, background='#EDE4E0', width= 200, height=200)
             frame1.pack(side=RIGHT, padx=10, ipadx=10)
 
             addBookButton = Button(frame1, text='Add a Book', command=partial(self.AddBook,['','','','','','','','','','']),border=0, image=self.addImg,compound=TOP, bg='#EDE4E0', font='Helvitica 15 bold')
             addBookButton.pack()
+        if calledFrom == "dashboard":
+            Label(self.centerFrame, text="All Store Books", font='Helvitica 20 bold', bg=self.centerFrameColor).pack()
+
         centerLeftFrame = Frame(self.centerFrame)
         centerLeftFrame.pack(side=TOP)
         Label(centerLeftFrame, text="My Books", font='Helvitica 12 bold').grid(row=0, column=0)
@@ -782,5 +845,6 @@ class AdminDashboard():
 
 
 # AdminDashboard([["Prasad", "prasad@gmail.com", 987679898, "pass1323", 846363]]).dashboard()
+
 
 

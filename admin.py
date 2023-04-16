@@ -11,7 +11,7 @@ class Admin():
 
     def __init__(self) -> None:
         self.root = Tk()
-
+        self.root.title("Admin Login Page")
         # Screen resolution
         self.width = self.root.winfo_screenwidth()
         self.height = self.root.winfo_screenheight()
@@ -147,6 +147,8 @@ class Admin():
         # self.root.destroy()
         self.clearFrame()
         window = self.root
+        window.title("Admin Register Page")
+
         # self.width = self.root.winfo_screenwidth()
         # self.height = self.root.winfo_screenheight()
         # print(self.width, self.height)

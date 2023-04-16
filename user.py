@@ -12,7 +12,7 @@ class User():
 
     def __init__(self) -> None:
         self.root = Tk()
-
+        self.root.title("User Login Page")
         self.db = Database()
         # Screen resolution
         self.width = self.root.winfo_screenwidth()
@@ -160,6 +160,8 @@ class User():
 
         self.clearFrame()
         window = self.root
+        window.title("User Register Page")
+
         # self.width = self.root.winfo_screenwidth()
         # self.height = self.root.winfo_screenheight()
         # print(self.width, self.height)

@@ -17,7 +17,7 @@ class UserDashboard():
         self.userDetails = userDetails
         # Initialise the tkinter
         self.root = Tk()
-
+        self.root.title("Book Information System Dashboard")
         self.db = Database()
 
         # Screen resolution
@@ -29,7 +29,7 @@ class UserDashboard():
 
         # Constants
         self.leftFrameColor = "#F5F3C1"
-        self.centerFrameColor = "#F6F1E9"
+        self.centerFrameColor = "#9bc9ff"
         self.topFrameColor = "#DDFFBB"
 
         # -------------------------------------- self.styles ---------------------------------------------
@@ -64,8 +64,15 @@ class UserDashboard():
         # left frame
         self.leftFrame = ttk.Frame(self.root, height=self.height-100, width=200, border=2, style='left.TFrame')
 
+        # Info image
+        infoImage = (Image.open("./assets/idea.png"))
+        infoImage = infoImage.resize((200, 200))
+        self.infoImg = ImageTk.PhotoImage(image=infoImage)
+
         # center Frame
         self.centerFrame = ttk.Frame(self.root, height=self.height-70, width=self.width-100, border=2, style='center.TFrame')
+
+        Label(self.centerFrame,image=self.infoImg, compound=TOP, text="Click on the Required section to get the data..", font='Helvitica 20 bold', bg=self.centerFrameColor).pack(fill=BOTH, ipadx=300, ipady=100)
 
 
         # --------------------- Images --------------------------------------------
@@ -83,7 +90,7 @@ class UserDashboard():
         self.sImg = ImageTk.PhotoImage(image=sImage)
 
         # Image for logout
-        logoutImage = (Image.open("./assets/logout.png"))
+        logoutImage = (Image.open("./assets/switch.png"))
         logoutImage = logoutImage.resize((30, 30))
         self.logoutImg = ImageTk.PhotoImage(image=logoutImage)
 
@@ -96,6 +103,21 @@ class UserDashboard():
         orderImage = (Image.open("./assets/order.png"))
         orderImage = orderImage.resize((30, 30))
         self.orderImg = ImageTk.PhotoImage(image=orderImage)
+
+        # Image for Feedback
+        reviewImage = (Image.open("./assets/review.png"))
+        reviewImage = reviewImage.resize((30, 30))
+        self.reviewImg = ImageTk.PhotoImage(image=reviewImage)
+
+        # Earnings image
+        earningImage = (Image.open("./assets/earnings1.png"))
+        earningImage = earningImage.resize((100, 100))
+        self.earnImg = ImageTk.PhotoImage(image=earningImage)
+
+        # Earnings image
+        chatImage = (Image.open("./assets/chat.png"))
+        chatImage = chatImage.resize((100, 100))
+        self.chatImg = ImageTk.PhotoImage(image=chatImage)
 
         # top frame image
         image = (Image.open("./assets/library.png"))
@@ -148,6 +170,7 @@ class UserDashboard():
                 print(e)
 
         window=Tk()
+        window.title("Profile Details")
         mainFrame = Frame(window, bg='#EDE4E0')
         mainFrame.pack(fill=BOTH)
         labelFrame = LabelFrame(mainFrame, text='Profile Details', bg='#EDE4E0',  highlightbackground='white', font='lucida 12 bold', relief='solid', padx=20)
@@ -185,6 +208,8 @@ class UserDashboard():
 
     def viewOrdersPage(self, data, subData):
         window=Tk()
+        window.title("Your Orders")
+
         print(data)
         e=Label(window,width=20,text='Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
         e.grid(row=0,column=0)
@@ -206,6 +231,40 @@ class UserDashboard():
                 e = Label(window, text=transaction[j]) 
                 e.grid(row=i, column=j) 
             i=i+1
+    
+    def getUserName(self, userMail, table):
+        query = ""
+        if table == "admin":
+            query = "SELECT * FROM admin WHERE email='{0}'".format(userMail)
+        else:
+            query = "SELECT * FROM user WHERE email='{0}'".format(userMail)
+        
+        self.db.cursor.execute(query)
+        data = self.db.cursor.fetchall()
+        return data[0][1]
+
+    
+    def viewReviewPage(self, data, subData):
+        window=Tk()
+        window.title("Your Reviews")
+
+        print(data)
+
+        e=Label(window,width=20,text='Comment',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=0)
+        e=Label(window,width=20,text='Store Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=1)
+        e=Label(window,width=20,text='Customer Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e.grid(row=0,column=2)
+       
+        i=1
+        for transaction in data: 
+            for j in range(1, 4):
+                e = Label(window, text=transaction[j]) 
+                e.grid(row=i, column=j-1) 
+            i=i+1
+    
+    
 
     def clearFrame(self):
         for widget in self.centerFrame.winfo_children():
@@ -216,8 +275,94 @@ class UserDashboard():
         self.clearFrame()
         self.AllBooks()
 
+    # Load Feedback
+    def loadFeedback(self):
+        self.clearFrame()
+        query = "SELECT * FROM feedback WHERE user_email='"+self.userDetails[0][1] + "'"
+        self.db.cursor.execute(query)
+        data = self.db.cursor.fetchall()
+
+        Label(self.centerFrame, text="Feedback", font='Helvitica 20 bold', bg=self.centerFrameColor).grid(row=0, column=1)
+        Frame(self.centerFrame, background=self.centerFrameColor).grid(row=0, column=4, ipadx=200)
+
+        frame1 = Frame(self.centerFrame, background='#EDE4E0', width= 200, height=200)
+        frame1.grid(row=0, column=0, rowspan=20, padx=50, ipadx=50, pady=200)
+        frame2 = Frame(self.centerFrame, background='#EDE4E0')
+        frame2.grid(row=0, column=1, rowspan=20, padx=50, ipadx=50, pady=200)
+        frame3 = Frame(self.centerFrame, background='#EDE4E0')
+        frame3.grid(row=0, column=2, rowspan=20, padx=50, ipadx=50, pady=200)
+
+        totalOrders = Label(frame1, image=self.countImg,compound=TOP, text='Total reviews Given', bg='#EDE4E0')
+        totalOrders.pack()
+        # totalOrders.bind("<Button-1>", self.displayUniqueBooks)
+        totalOrdersLabel = Label(frame1, text=str(len(data)), background='#EDE4E0', font='Helvitica 15 bold')
+        totalOrdersLabel.pack()
+
+        viewOrdersLabel = Label(frame2,image=self.checkImg,compound=TOP, text="\nView Reviews", background='#EDE4E0', font='Helvitica 15 bold')
+        viewOrdersLabel.pack()
+        viewOrdersLabel.bind("<Button-1>", partial(self.viewReviewPage,data))
+
+        totalEarning = Label(frame3, image=self.chatImg,compound=TOP, text='\nGive Feedback', bg='#EDE4E0', font='Helvitica 15 bold')
+        totalEarning.pack()
+        totalEarning.bind("<Button-1>", self.loadFeedbackForm)
+        
+    def getAllStoreDetails(self):
+        query = "SELECT * FROM admin"
+        self.db.cursor.execute(query)
+        data = self.db.cursor.fetchall()
+        print(data)
+        return data
+    # Load Feedback form
+    def loadFeedbackForm(self, data):
+        def submitFeedback():
+            currentIndex = selectedStore.current()
+            query = "INSERT INTO feedback(comments, store_name, user_name, store_email, user_email) VALUES ('{0}','{1}','{2}','{3}','{4}')".format(comment.get(), storeNames[currentIndex],self.userDetails[0][0], storeDetails[currentIndex][1],self.userDetails[0][1])
+            self.db.cursor.execute(query)
+            self.db.connection.commit()
+            messagebox.showinfo(title='Success', message='Feedback submitted successfully!!')
+            window.destroy()
+
+
+
+        window=Tk()
+        window.title("Feedback")
+        mainFrame = Frame(window, bg='#EDE4E0')
+        mainFrame.pack(fill=BOTH)
+        labelFrame = LabelFrame(mainFrame, text='Feedback Form', bg='#EDE4E0',  highlightbackground='white', font='lucida 12 bold', relief='solid', padx=20)
+        labelFrame.pack(expand=True, fill=X)
+        commentLabel = Label(labelFrame, text='Comment',  bg='#EDE4E0', font='lucida 10 bold')
+        commentLabel.pack(pady=2)
+        comment = ttk.Entry(labelFrame, width=30)
+        comment.pack(pady=2)
+
+        n = StringVar()
+        selectedStore = ttk.Combobox(labelFrame, width = 27, textvariable = n)
+        storeNames = []
+        storeDetails = self.getAllStoreDetails()
+        for data in storeDetails:
+            # print(list(data)[0])
+            storeNames.append(data[0])
+        
+        selectedStore['values'] = storeNames
+
+        selectedStore.pack(pady=2)
+
+        submitForm = Button(labelFrame, text="Update Profile", command= submitFeedback)
+        submitForm.pack(pady=20)
+
+
+
+
     # Load Orders
     def loadOrders(self):
+
+        # Gives total earnings
+        def totalEarnings():
+            sum = 0
+            for d in data:
+                sum += d[3]
+            return sum
+        
         self.clearFrame()
         query = "SELECT * FROM transaction WHERE user_email='"+self.userDetails[0][1] + "'"
         self.db.cursor.execute(query)
@@ -226,12 +371,15 @@ class UserDashboard():
             # Label(self.centerFrame, text=str(data[0])).pack()
         
         # Reports
+        Label(self.centerFrame, text="Orders Summary", font='Helvitica 20 bold', bg=self.centerFrameColor).grid(row=0, column=1)
+        Frame(self.centerFrame, background=self.centerFrameColor).grid(row=0, column=4, ipadx=200)
+
         frame1 = Frame(self.centerFrame, background='#EDE4E0', width= 200, height=200)
-        frame1.grid(row=0, column=0, rowspan=20, padx=30, ipadx=50)
+        frame1.grid(row=0, column=0, rowspan=20, padx=50, ipadx=50, pady=200)
         frame2 = Frame(self.centerFrame, background='#EDE4E0')
-        frame2.grid(row=0, column=1, rowspan=20, padx=30, ipadx=50)
+        frame2.grid(row=0, column=1, rowspan=20, padx=50, ipadx=50, pady=200)
         frame3 = Frame(self.centerFrame, background='#EDE4E0')
-        frame3.grid(row=0, column=2, rowspan=20, padx=30, ipadx=50)
+        frame3.grid(row=0, column=2, rowspan=20, padx=50, ipadx=50, pady=200)
 
         totalOrders = Label(frame1, image=self.countImg,compound=TOP, text='Total Orders', bg='#EDE4E0')
         totalOrders.pack()
@@ -242,6 +390,12 @@ class UserDashboard():
         viewOrdersLabel = Label(frame2,image=self.checkImg,compound=TOP, text="\nView Orders", background='#EDE4E0', font='Helvitica 15 bold')
         viewOrdersLabel.pack()
         viewOrdersLabel.bind("<Button-1>", partial(self.viewOrdersPage,data))
+
+        totalEarning = Label(frame3, image=self.earnImg,compound=TOP, text='Total Expenditure', bg='#EDE4E0')
+        totalEarning.pack()
+        # totalOrders.bind("<Button-1>", self.displayUniqueBooks)
+        totalEarningsLabel = Label(frame3, text="$ "+str(totalEarnings()), background='#EDE4E0', font='Helvitica 15 bold')
+        totalEarningsLabel.pack()
         
 
     # Load searchBook 
@@ -277,9 +431,11 @@ class UserDashboard():
                     list_books.insert(count, str(count+1)+"."+data[0])
                     count += 1
                 list_books.bind("<<ListboxSelect>>", bookInfo)
+        
+        Label(self.centerFrame, text="Search Bar", font='Helvitica 20 bold', bg=self.centerFrameColor).grid(column=0, row=0)
         # search bar
         searchBar = LabelFrame(self.centerFrame, width=300, height=200, text='Search box', bg='#9bc9ff')
-        searchBar.grid(row=0, column=0, sticky=N)
+        searchBar.grid(row=1, column=0, sticky=N)
 
         def focus_out(field):
             # print('focus out:', userName.get())
@@ -332,6 +488,7 @@ class UserDashboard():
         
         def bookInfo(event):
             book_data = ''
+            zipCode = ''
             if event != '':
                 value = str(list_books.get(list_books.curselection()))
                 name = value.split(".")[1]
@@ -339,6 +496,10 @@ class UserDashboard():
                 self.db.cursor.execute("select * from books where name='"+name+"'")
                 book_data = self.db.cursor.fetchall()
                 print(book_data)
+                self.db.cursor.execute("select * from admin where email='{0}'".format(book_data[0][8]))
+                adminData = self.db.cursor.fetchall()
+                print(adminData)
+                zipCode = adminData[0][4]
             else:
                 book_data = ['--------------------------']
             
@@ -369,13 +530,16 @@ class UserDashboard():
 
             Label(bookDetailsFrame, text="Publisher Name", bg='#D8D9CF').grid(row =1, column=7)
             Label(bookDetailsFrame, text=str(book_data[0][6]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=7, ipadx=10)
+
+            Label(bookDetailsFrame, text="ZipCode", bg='#D8D9CF').grid(row =1, column=8)
+            Label(bookDetailsFrame, text=zipCode, bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=8, ipadx=10)
             if book_data[0][5] != 0:
                 Button(bookDetailsFrame, text='Register Book', command=partial(self.registerBook, book_data[0])).grid(row=3, column=4,padx=20)
             else:
                 Button(bookDetailsFrame, text='Notify Me').grid(row=3, column=4,padx=20)
         
         detailsFrame = LabelFrame(self.centerFrame, width=300, height=200, text='Searched Books', bg='#9bc9ff')
-        detailsFrame.grid(row=1, column=0, sticky=W)
+        detailsFrame.grid(row=2, column=0, sticky=W)
 
         list_books = Listbox(detailsFrame, width=40, height=30, bd=0, border=0, highlightthickness=0)
         scroll_bar = Scrollbar(detailsFrame, orient=VERTICAL, bd=0, border=0, highlightthickness=0)
@@ -446,7 +610,7 @@ class UserDashboard():
 
 
         # Title
-        title = ttk.Label(self.topFrame, text="Book Management System", style='title.TLabel')
+        title = ttk.Label(self.topFrame, text="Book Information System", style='title.TLabel')
         title.pack(side=LEFT)
 
         # User Profile logo and name
@@ -475,13 +639,16 @@ class UserDashboard():
         yourOrders = ttk.Button(self.leftFrame, text="Your Orders", image=self.orderImg, style="navButton.TButton", compound=LEFT, command=self.loadOrders)
         yourOrders.pack()
 
+        # Feedback 
+        feedback = ttk.Button(self.leftFrame, text="Feedback", image=self.reviewImg, style="navButton.TButton", compound=LEFT, command=self.loadFeedback)
+        feedback.pack()
+
         # Exit
         logout = ttk.Button(self.leftFrame, text="Logout ", image=self.logoutImg, style="navButton.TButton", compound=LEFT, command=self.logout)
         logout.pack()
 
         self.root.mainloop()
 
-        
     # Register the book
     def registerBook(self, bookData):
         self.playVideoAd()
@@ -495,6 +662,8 @@ class UserDashboard():
         adminEmail = self.db.cursor.fetchall()
         print(adminEmail)
         self.db.registerBook(user_name, bookName, bookStore, bookCost, tran_time, self.userDetails[0][1], adminEmail[0][0])
+        self.db.cursor.execute("UPDATE books SET quantity={0} WHERE name='{1}'".format(bookData[5]-1, bookName))
+        self.db.connection.commit()
         messagebox.showinfo(title='Success', message='Book registered successfully.. Check in Your Orders section')
         self.relaunchDashboard()
 
@@ -509,6 +678,11 @@ class UserDashboard():
                 self.db.cursor.execute("select * from books where name='"+name+"'")
                 book_data = self.db.cursor.fetchall()
                 print(book_data)
+                self.db.cursor.execute("select * from admin where email='{0}'".format(book_data[0][8]))
+                adminData = self.db.cursor.fetchall()
+                print(adminData)
+                zipCode = adminData[0][4]
+
             else:
                 book_data = ['--------------------------']
             
@@ -517,32 +691,35 @@ class UserDashboard():
             
             # listDetails.delete(0, END)
             detailsLabel = ttk.Label(bookDetailsFrame, image=self.Bimg)
-            detailsLabel.pack()
+            detailsLabel.grid(row=0, column=4)
 
-            Label(bookDetailsFrame,text="Book Name:", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][0]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame,text="Book Name", bg='#D8D9CF').grid(row=1, column=0)
+            Label(bookDetailsFrame, text=str(book_data[0][0]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=0, ipadx=10)
 
-            Label(bookDetailsFrame, text="Price", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][1]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Price", bg='#D8D9CF').grid(row=1, column=2)
+            Label(bookDetailsFrame, text=str(book_data[0][1]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=2, ipadx=10)
 
-            Label(bookDetailsFrame, text="Author", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][2]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Author", bg='#D8D9CF').grid(row=1, column=3)
+            Label(bookDetailsFrame, text=str(book_data[0][2]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=3, ipadx=10)
 
-            Label(bookDetailsFrame, text="Published Year", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][3]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Published Year", bg='#D8D9CF').grid(row=1, column=4)
+            Label(bookDetailsFrame, text=str(book_data[0][3]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=4, ipadx=10)
 
-            Label(bookDetailsFrame, text="Store Name:", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][4]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Store Name", bg='#D8D9CF').grid(row=1, column=5)
+            Label(bookDetailsFrame, text=str(book_data[0][4]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=5, ipadx=10)
 
-            Label(bookDetailsFrame, text="Quantity", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][5]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Quantity", bg='#D8D9CF').grid(row=1, column=6)
+            Label(bookDetailsFrame, text=str(book_data[0][5]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=6, ipadx=10)
 
-            Label(bookDetailsFrame, text="Publisher Name:", bg='#D8D9CF').pack()
-            Label(bookDetailsFrame, text=str(book_data[0][6]), bg='#D8D9CF', font='Helvitica 12 bold').pack()
+            Label(bookDetailsFrame, text="Publisher Name", bg='#D8D9CF').grid(row =1, column=7)
+            Label(bookDetailsFrame, text=str(book_data[0][6]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=7, ipadx=10)
+
+            Label(bookDetailsFrame, text="ZipCode", bg='#D8D9CF').grid(row =1, column=8)
+            Label(bookDetailsFrame, text=zipCode, bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=8, ipadx=10)
             if book_data[0][5] != 0:
-                Button(bookDetailsFrame, text='Register Book', command=partial(self.registerBook,book_data[0])).pack(pady=20)
+                Button(bookDetailsFrame, text='Register Book', command=partial(self.registerBook,book_data[0])).grid(row=3, column=4,pady=20)
             else:
-                Button(bookDetailsFrame, text='Notify Me').pack()
+                Button(bookDetailsFrame, text='Notify Me').grid(row=3, column=4,pady=20)
         
         def getZipCodes():
             query = "SELECT admin.* from books INNER JOIN admin ON admin.name=books.book_store"
@@ -572,21 +749,26 @@ class UserDashboard():
                 count += 1
             list_books.bind("<<ListboxSelect>>", bookInfo)
 
-        list_books = Listbox(self.centerFrame, width=40, height=30, bd=0, border=0, highlightthickness=0)
-        scroll_bar = Scrollbar(self.centerFrame, orient=VERTICAL, bd=0, border=0, highlightthickness=0)
-        list_books.grid(row=0, column=0, padx=(10,0), pady=10, sticky=N)
+        # Label(self.centerFrame, text="All Books", font='Helvitica 20 bold', bg=self.centerFrameColor).grid(row=0, column=0)
+        centerLeftFrame = Frame(self.centerFrame)
+        centerLeftFrame.pack(side=TOP)
+        Label(centerLeftFrame, text="Books from all stores", font='Helvitica 12 bold').grid(row=0, column=0)
+        Label(centerLeftFrame, text="Book Details", font='Helvitica 12 bold').grid(row=0, column=1)
+        list_books = Listbox(centerLeftFrame, font='Helvitica 10 bold', width=40, height=35, bd=0, border=0, highlightthickness=0, bg='#F8CBA6')
+        scroll_bar = Scrollbar(centerLeftFrame, orient=VERTICAL, bd=0, border=0, highlightthickness=0)
+        list_books.grid(row=1, column=0, padx=(10,0), pady=10, sticky=N, ipadx=5, ipady=5)
         scroll_bar.config(command=list_books.yview)
         list_books.config(yscrollcommand=scroll_bar.set)
-        scroll_bar.grid(row=0, column=0, sticky=N+S+E)
+        scroll_bar.grid(row=1, column=0, sticky=N+S+E)
 
 
         displayBooks()
-        getZipCodes()
+        zipCodeData = getZipCodes()
         # list details
         # listDetails = Listbox(self.centerFrame, width=80, height=30, bd=2)
         # listDetails.grid(row=0, column=1, padx=(10,0), pady=10, sticky=N)
-        bookDetailsFrame = Frame(self.centerFrame, background='#D8D9CF')
-        bookDetailsFrame.grid(row=0, column=1, sticky=N, padx=20, ipadx=50, ipady=20)
+        bookDetailsFrame = Frame(centerLeftFrame, background='#D8D9CF')
+        bookDetailsFrame.grid(row=1, column=1, sticky=N, padx=20, ipadx=50, ipady=20)
 
         bookInfo('')
 # AdminDashboard("Nothing").dashboard()
