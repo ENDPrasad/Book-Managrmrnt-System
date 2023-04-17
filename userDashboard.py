@@ -1,9 +1,11 @@
 
 import datetime
 from functools import partial
+from multiprocessing import Pool
 import time
 from tkinter import Tk, messagebox, ttk
 from tkinter import *
+from playsound import playsound
 from PIL import Image, ImageTk
 import imageio
 import mysql.connector
@@ -135,7 +137,7 @@ class UserDashboard():
 
         # Book image
         bookImage = (Image.open("./assets/book.png"))
-        bookImage = bookImage.resize((100, 100))
+        bookImage = bookImage.resize((200, 200))
         self.Bimg = ImageTk.PhotoImage(image=bookImage)
 
         # count image
@@ -250,7 +252,7 @@ class UserDashboard():
 
         print(data)
 
-        e=Label(window,width=20,text='Comment',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
+        e=Label(window,width=40,text='Comment',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
         e.grid(row=0,column=0)
         e=Label(window,width=20,text='Store Name',borderwidth=1, relief='ridge',anchor='w', background='#F1D3B3')
         e.grid(row=0,column=1)
@@ -316,7 +318,7 @@ class UserDashboard():
     def loadFeedbackForm(self, data):
         def submitFeedback():
             currentIndex = selectedStore.current()
-            query = "INSERT INTO feedback(comments, store_name, user_name, store_email, user_email) VALUES ('{0}','{1}','{2}','{3}','{4}')".format(comment.get(), storeNames[currentIndex],self.userDetails[0][0], storeDetails[currentIndex][1],self.userDetails[0][1])
+            query = "INSERT INTO feedback(comments, store_name, user_name, store_email, user_email) VALUES ('{0}','{1}','{2}','{3}','{4}')".format(comment.get("1.0", "end-1c"), storeNames[currentIndex],self.userDetails[0][0], storeDetails[currentIndex][1],self.userDetails[0][1])
             self.db.cursor.execute(query)
             self.db.connection.commit()
             messagebox.showinfo(title='Success', message='Feedback submitted successfully!!')
@@ -332,8 +334,11 @@ class UserDashboard():
         labelFrame.pack(expand=True, fill=X)
         commentLabel = Label(labelFrame, text='Comment',  bg='#EDE4E0', font='lucida 10 bold')
         commentLabel.pack(pady=2)
-        comment = ttk.Entry(labelFrame, width=30)
+        comment = Text(labelFrame, width=30, height=5)
         comment.pack(pady=2)
+
+        StoreLabel = Label(labelFrame, text='Store Name',  bg='#EDE4E0', font='lucida 10 bold')
+        StoreLabel.pack(pady=2)
 
         n = StringVar()
         selectedStore = ttk.Combobox(labelFrame, width = 27, textvariable = n)
@@ -431,6 +436,8 @@ class UserDashboard():
                     list_books.insert(count, str(count+1)+"."+data[0])
                     count += 1
                 list_books.bind("<<ListboxSelect>>", bookInfo)
+            else:
+                messagebox.askokcancel("Error", message="No books found under this name: '{0}'!!".format(value))
         
         Label(self.centerFrame, text="Search Bar", font='Helvitica 20 bold', bg=self.centerFrameColor).grid(column=0, row=0)
         # search bar
@@ -508,7 +515,7 @@ class UserDashboard():
             
             # listDetails.delete(0, END)
             detailsLabel = ttk.Label(bookDetailsFrame, image=self.Bimg)
-            detailsLabel.grid(row=0, column=4)
+            detailsLabel.grid(row=0, column=4, columnspan=2)
 
             Label(bookDetailsFrame,text="Book Name", bg='#D8D9CF').grid(row=1, column=0)
             Label(bookDetailsFrame, text=str(book_data[0][0]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=0, ipadx=10)
@@ -534,9 +541,9 @@ class UserDashboard():
             Label(bookDetailsFrame, text="ZipCode", bg='#D8D9CF').grid(row =1, column=8)
             Label(bookDetailsFrame, text=zipCode, bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=8, ipadx=10)
             if book_data[0][5] != 0:
-                Button(bookDetailsFrame, text='Register Book', command=partial(self.registerBook, book_data[0])).grid(row=3, column=4,padx=20)
+                Button(bookDetailsFrame, text='Register Book', command=partial(self.registerBook, book_data[0])).grid(row=3, column=5,padx=20)
             else:
-                Button(bookDetailsFrame, text='Notify Me').grid(row=3, column=4,padx=20)
+                Button(bookDetailsFrame, text='Notify Me').grid(row=3, column=5,padx=20)
         
         detailsFrame = LabelFrame(self.centerFrame, width=300, height=200, text='Searched Books', bg='#9bc9ff')
         detailsFrame.grid(row=2, column=0, sticky=W)
@@ -552,7 +559,7 @@ class UserDashboard():
         # listDetails = Listbox(self.centerFrame, width=80, height=30, bd=2)
         # listDetails.grid(row=0, column=1, padx=(10,0), pady=10, sticky=N)
         bookDetailsFrame = Frame(detailsFrame, background='#D8D9CF')
-        bookDetailsFrame.grid(row=1, column=2, sticky=N, padx=20, ipadx=50, ipady=20)
+        bookDetailsFrame.grid(row=1, column=2, sticky=N, padx=20, ipadx=50, ipady=20, pady=100)
 
         bookInfo('')
 
@@ -586,7 +593,7 @@ class UserDashboard():
         l1.pack()
         video_name = "./assets/CMU.mp4"   #Image-path
         video = imageio.get_reader(video_name)
-        delay = int(60 / video.get_meta_data()['fps'])
+        delay = int(60 / video.get_meta_data()['fps'])         
         stream()
         window.mainloop() 
 
@@ -691,7 +698,7 @@ class UserDashboard():
             
             # listDetails.delete(0, END)
             detailsLabel = ttk.Label(bookDetailsFrame, image=self.Bimg)
-            detailsLabel.grid(row=0, column=4)
+            detailsLabel.grid(row=0, column=3, columnspan=3)
 
             Label(bookDetailsFrame,text="Book Name", bg='#D8D9CF').grid(row=1, column=0)
             Label(bookDetailsFrame, text=str(book_data[0][0]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=0, ipadx=10)
@@ -717,9 +724,9 @@ class UserDashboard():
             Label(bookDetailsFrame, text="ZipCode", bg='#D8D9CF').grid(row =1, column=8)
             Label(bookDetailsFrame, text=zipCode, bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=8, ipadx=10)
             if book_data[0][5] != 0:
-                Button(bookDetailsFrame, text='Register Book', command=partial(self.registerBook,book_data[0])).grid(row=3, column=4,pady=20)
+                Button(bookDetailsFrame, text='Register Book', command=partial(self.registerBook,book_data[0])).grid(row=3, column=5,pady=20)
             else:
-                Button(bookDetailsFrame, text='Notify Me').grid(row=3, column=4,pady=20)
+                Button(bookDetailsFrame, text='Notify Me').grid(row=3, column=5,pady=20)
         
         def getZipCodes():
             query = "SELECT admin.* from books INNER JOIN admin ON admin.name=books.book_store"
@@ -768,7 +775,7 @@ class UserDashboard():
         # listDetails = Listbox(self.centerFrame, width=80, height=30, bd=2)
         # listDetails.grid(row=0, column=1, padx=(10,0), pady=10, sticky=N)
         bookDetailsFrame = Frame(centerLeftFrame, background='#D8D9CF')
-        bookDetailsFrame.grid(row=1, column=1, sticky=N, padx=20, ipadx=50, ipady=20)
+        bookDetailsFrame.grid(row=1, column=1, sticky=N, padx=20, ipadx=50, ipady=20, pady=100)
 
         bookInfo('')
 # AdminDashboard("Nothing").dashboard()

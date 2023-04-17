@@ -132,7 +132,7 @@ class AdminDashboard():
 
         # Book image
         bookImage = (Image.open("./assets/book.png"))
-        bookImage = bookImage.resize((100, 100))
+        bookImage = bookImage.resize((200, 200))
         self.Bimg = ImageTk.PhotoImage(image=bookImage)
 
         # No Book image
@@ -253,6 +253,8 @@ class AdminDashboard():
                     list_books.insert(count, str(count+1)+"."+data[0])
                     count += 1
                 list_books.bind("<<ListboxSelect>>", bookInfo)
+            else:
+                messagebox.askokcancel("Error", message="No books found under this name: '{0}'!!".format(value))
         
         Label(self.centerFrame, text="Search Bar", font='Helvitica 20 bold', bg=self.centerFrameColor).grid(column=0, row=0)
         # search bar
@@ -325,7 +327,7 @@ class AdminDashboard():
             
             # listDetails.delete(0, END)
             detailsLabel = ttk.Label(bookDetailsFrame, image=self.Bimg)
-            detailsLabel.grid(row=0, column=4)
+            detailsLabel.grid(row=0, column=3, columnspan=2)
 
             Label(bookDetailsFrame,text="Book Name", bg='#D8D9CF').grid(row=1, column=0)
             Label(bookDetailsFrame, text=str(book_data[0][0]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=0, ipadx=10)
@@ -362,7 +364,7 @@ class AdminDashboard():
         # listDetails = Listbox(self.centerFrame, width=80, height=30, bd=2)
         # listDetails.grid(row=0, column=1, padx=(10,0), pady=10, sticky=N)
         bookDetailsFrame = Frame(detailsFrame, background='#D8D9CF')
-        bookDetailsFrame.grid(row=1, column=2, sticky=N, padx=20, ipadx=50, ipady=20)
+        bookDetailsFrame.grid(row=1, column=2, sticky=N, padx=20, ipadx=50, ipady=20, pady=100)
 
         bookInfo('')
     
@@ -762,7 +764,7 @@ class AdminDashboard():
                 
                 # listDetails.delete(0, END)
                 detailsLabel = ttk.Label(bookDetailsFrame, image=self.Bimg)
-                detailsLabel.grid(row=0, column=4)
+                detailsLabel.grid(row=0, column=3, columnspan=2)
                 data = [book_data[0][0], book_data[0][5], book_data[0][6], book_data[0][3], book_data[0][1], book_data[0][2], book_data[0][7]]
                 Label(bookDetailsFrame,text="Book Name", bg='#D8D9CF').grid(row=1, column=0)
                 Label(bookDetailsFrame, text=str(book_data[0][0]), bg='#D8D9CF', font='Helvitica 12 bold').grid(row=2, column=0, ipadx=10)
@@ -835,7 +837,7 @@ class AdminDashboard():
         # listDetails = Listbox(self.centerFrame, width=80, height=30, bd=2)
         # listDetails.grid(row=0, column=1, padx=(10,0), pady=10, sticky=N)
         bookDetailsFrame = Frame(centerLeftFrame, background='#D8D9CF')
-        bookDetailsFrame.grid(row=1, column=1, sticky=N, padx=20, ipady=50, ipadx=20)
+        bookDetailsFrame.grid(row=1, column=1, sticky=N, padx=20, ipady=50, ipadx=20, pady=100)
 
         displayBooks()
         
